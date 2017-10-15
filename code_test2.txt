@@ -1,0 +1,18 @@
+program my_program;
+
+var foo1, foo2 : int;
+var dummy1 : float;
+
+def int my_function(int parameter1, bool parameter2) {
+	var foo3, foo4 : int;
+}
+
+def int my_function2(float parameter1, bool parameter2) {
+	var foo5, foo6 : float;
+}
+
+main {
+
+}
+
+4 + 5.0 * C  

@@ -20,7 +20,7 @@ class VariableTable():
     def get_variable(self, variable_name):
         """Gets a variable from the list"""
         if self.has_variable(variable_name):
-            return self.variable_list(variable_name)
+            return self.variable_list[variable_name]
         else:
             return None
 

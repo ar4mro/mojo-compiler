@@ -40,7 +40,7 @@ class FunctionDirectory():
         else:
             print("The function you are trying to add the paremeter doesnt exist")
 
-    def add_variabe_to_function(self, function_name, variable_type,
+    def add_variable_to_function(self, function_name, variable_type,
             variable_name):
         """Adds a variable to its function variable table"""
         function = self.get_function(function_name)
@@ -51,6 +51,20 @@ class FunctionDirectory():
                 function['variables'].add_variable(variable_type, variable_name)
         else:
             print("The function you are trying to add the variable doesnt exist")
+
+    def get_function_variable(self, function_name, variable_name):
+        """Looks for a variable in the function"""""
+        function = self.get_function(function_name)
+        if function is not None:
+            variable = function['variables'].get_variable(variable_name)
+            if variable is not None:
+                return variable
+            else:
+                #print("This variable doesnt exists in this function")
+                return None
+        else:
+            print("The function you are trying to find when looking for the" +
+                "variable doesnt exists")
 
     def print_directory(self):
         """Prints the list of functions and its properties"""

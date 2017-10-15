@@ -9,17 +9,30 @@
 # cfd_action -> Create function directory
 # adv_action -> Add a variable to the current function
 # adf_action -> Adds a new function to the directory
+# amf_action -> Adds the main function to the directory
+# pio_action -> Push a variable operand to the stack
+# pfo_action -> Push float operand to the stack
+# pso_action -> Push string operand to the stack
+# pbo_action -> Push boolean operand to the stack
+# pid_action -> Push id operand to stack
+# pop_action -> Push an operator to its stack
+# sot_action -> Solve term
+# sof_action -> Solve factor
+# abm -> Add bottom mark
+# rbm -> Remove bottom mark
 
 import sys
 import ply.yacc as yacc
 
 from mojo_lexer import tokens
 from helpers.program import Program
+from helpers.quadruple import Quadruple
 
 my_program = Program()
 
+# Parsing rules
 def p_program(p):
-    '''program : PROGRAM ID cfd_action SEMICOLON vars functions MAIN block'''
+    '''program : PROGRAM ID cfd_action SEMICOLON vars functions MAIN amf_action block'''
     print('Syntax correct')
 
 # Creates the function directory
@@ -27,7 +40,8 @@ def p_cfd_action(p):
     '''cfd_action : '''
     my_program.global_scope = p[-1]
     my_program.current_scope = p[-1]
-    # Adds the program, global scope, to the directory
+
+    # Adds the program, the global scope, to the directory
     my_program.function_directory.add_function('void', my_program.global_scope)
 
 def p_vars(p):
@@ -56,7 +70,7 @@ def p_adv_action(p):
 
     # Adds all the variables declared in the line to the function
     for variable in my_program.temporal_variables:
-        my_program.function_directory.add_variabe_to_function(
+        my_program.function_directory.add_variable_to_function(
                 my_program.current_scope, variable_type, variable)
 
     # Clears the list of temporal variables to start a new line of declarations
@@ -109,6 +123,12 @@ def p_adf_action(p):
     # Cleras the temporal parameters
     del my_program.temporal_parameters[:]
 
+# Adds the main function to function directory
+def p_amf_action(p):
+    '''amf_action : '''
+    my_program.current_scope = p[-1]
+    my_program.function_directory.add_function('void', my_program.current_scope)
+
 def p_block(p):
     '''block : LBRACE vars statements RBRACE'''
 
@@ -158,30 +178,113 @@ def p_expression(p):
                   | exp NE exp'''
 
 def p_exp(p):
-    '''exp : term
-           | term PLUS exp
-           | term MINUS exp'''
+    '''exp : term sot_action
+           | term sot_action PLUS pop_action exp
+           | term sot_action MINUS pop_action exp '''
+
+# Solve term
+def p_sot_action(p):
+    '''sot_action : '''
+    if len(my_program.operator_stack) > 0 and len(my_program.operand_stack) > 1:
+        if my_program.operator_stack[-1] == '+' or my_program.operator_stack[-1] == '-':
+            solve_operation(p)
 
 def p_term(p):
-    '''term : factor
-            | factor TIMES term
-            | factor DIVIDE term'''
+    '''term : factor sof_action
+            | factor sof_action TIMES pop_action term
+            | factor sof_action DIVIDE pop_action term'''
+
+# Solve factor
+def p_sof_action(p):
+    '''sof_action : '''
+    if len(my_program.operator_stack) > 0 and len(my_program.operand_stack) > 1:
+        if my_program.operator_stack[-1] == '*' or my_program.operator_stack[-1] == '/':
+            solve_operation(p)
 
 def p_factor(p):
-    '''factor : LPAREN super_expression RPAREN
-              | var_const'''
+    '''factor : LPAREN abm_action super_expression RPAREN rbm_action
+              | var_const '''
+
+# Adds a false bottom mark to the operator stack
+def p_abm_action(p):
+    '''abm_action : '''
+    my_program.operator_stack.append('()')
+
+# Removes the false bottom mark
+def p_rbm_action(p):
+    '''rbm_action : '''
+    my_program.operator_stack.pop()
+
+# Push an operator to its stack
+def p_pop_action(p):
+    '''pop_action : '''
+    my_program.operator_stack.append(p[-1])
 
 def p_var_const(p):
-    '''var_const : ID list_call
-                 | ICONST
-                 | FCONST
-                 | SCONST
-                 | boolean_value
+    '''var_const : ID pid_action list_call
+                 | ICONST pio_action
+                 | FCONST pfo_action
+                 | SCONST pso_action
+                 | boolean_value pbo_action
                  | function_call'''
+
+# Push a variable to the operand stack
+def p_pid_action(p):
+    '''pid_action : '''
+    # Checks if the variable exists in the local scope
+    # print("Scope : " + my_program.current_scope)
+    variable = my_program.function_directory.get_function_variable(
+        my_program.current_scope, p[-1])
+
+    if variable is None:
+        # Checks if the variable exists in the global scope
+        # print("Scope : " + my_program.global_scope)
+        variable = my_program.function_directory.get_function_variable(
+            my_program.global_scope, p[-1])
+        if variable is None:
+            print("The variable " + p[-1] + " has not been declared")
+            sys.exit()
+        else:
+            # Adds the variale to the operand stack
+            my_program.operand_stack.append(variable['name'])
+            my_program.type_stack.append(variable['type'])
+    else:
+        # Adds the variale to the operand stack
+        my_program.operand_stack.append(variable['name'])
+        my_program.type_stack.append(variable['type'])
+
+# Push an intenger to the operand stack
+def p_pio_action(p):
+    '''pio_action : '''
+    my_program.operand_stack.append(int(p[-1]))
+    my_program.type_stack.append('int')
+
+# Push a float to the operand stack
+def p_pfo_action(p):
+    '''pfo_action : '''
+    my_program.operand_stack.append(float(p[-1]))
+    my_program.type_stack.append('float')
+
+# Push a string to the operand stack
+def p_pso_action(p):
+    '''pso_action : '''
+    my_program.operand_stack.append(str(p[-1]))
+    my_program.type_stack.append('string')
+
+# Push a boolean to the operand stack
+def p_pbo_action(p):
+    '''pbo_action : '''
+    if p[-1] == "true":
+        my_program.operand_stack.append(True)
+        my_program.type_stack.append('boolean')
+    else:
+        my_program.operand_stack.append(False)
+        my_program.type_stack.append('boolean')
 
 def p_boolean_value(p):
     '''boolean_value : TRUE
                      | FALSE'''
+    p[0] = p[1]
 
 def p_list_call(p):
     '''list_call : LBRACKET exp RBRACKET
@@ -232,6 +335,40 @@ def p_error(p):
     print('Syntax error at input line {0}'.format(p.lexer.lineno))
     sys.exit()
 
+def solve_operation(p):
+    """Solve an operation from the stacks"""
+
+    # Gets the operands and its types
+    right_operand = my_program.operand_stack.pop()
+    right_type = my_program.type_stack.pop()
+    left_operand = my_program.operand_stack.pop()
+    left_type = my_program.type_stack.pop()
+
+    # Gets the operator
+    operator = my_program.operator_stack.pop()
+
+    # Gets the type of the result
+    result_type = my_program.semantic_cube.get_semantic_type(left_type ,
+        right_type, operator)
+
+
+    if result_type != 'error':
+        my_program.temporal_variable_counter += 1
+        temporal_variable = "t" + str(my_program.temporal_variable_counter)
+
+        # Creates the quadruple
+        quadruple = Quadruple(operator, left_operand, right_operand , temporal_variable)
+
+        # Adds the quadruple to its list and the results to the stacks
+        my_program.quadruple_list.append(quadruple)
+        my_program.operand_stack.append(temporal_variable)
+        my_program.type_stack.append(result_type)
+    else:
+        print('Operation type mismatch at {0}'.format(p.lexer.lineno))
+        sys.exit()
+
+
+
 def make_parser():
     parser = yacc.yacc()
 
@@ -243,8 +380,10 @@ def make_parser():
         code = file_object.read()
         parser.parse(code)
 
-    my_program.function_directory.print_directory()
+    #my_program.function_directory.print_directory()
     #print(str(my_program.temporal_parameters))
+    my_program.print_stacks()
+    my_program.print_quadruples()
 
     return parser
 
