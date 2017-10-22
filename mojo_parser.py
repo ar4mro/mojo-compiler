@@ -18,6 +18,9 @@
 # pop_action -> Push an operator to its stack
 # sot_action -> Solve term
 # sof_action -> Solve factor
+# sor_action -> Solve relational operations
+# sol_action -> Solve logical operations
+# soa_action -> Solve assignment
 # abm -> Add bottom mark
 # rbm -> Remove bottom mark
 
@@ -146,11 +149,42 @@ def p_statement(p):
                  | return'''
 
 def p_assignment(p):
-    '''assignment : ID list_assignment ASSIGN super_expression SEMICOLON'''
+    '''assignment : ID pid_action list_assignment ASSIGN pop_action super_expression SEMICOLON soa_action'''
 
 def p_list_assignment(p):
     '''list_assignment : LBRACKET exp RBRACKET
                        | empty'''
+
+# Solves the assignment and creates its quadruple
+def p_soa_action(p):
+    '''soa_action : '''
+    # Gets the operator
+    operator = my_program.operator_stack.pop()
+
+    if operator == '=':
+        # Gets the operands and its types
+        right_operand = my_program.operand_stack.pop()
+        right_type = my_program.type_stack.pop()
+        left_operand = my_program.operand_stack.pop()
+        left_type = my_program.type_stack.pop()
+
+        # Gets the type of the result
+        result_type = my_program.semantic_cube.get_semantic_type(left_type ,
+            right_type, operator)
+
+        if result_type != 'error':
+            # Creates the quadruple
+            quadruple = Quadruple(my_program.quadruple_number, operator,
+                right_operand, None , left_operand)
+
+            # Adds the quadruple to its list and increments the counter
+            my_program.quadruple_list.append(quadruple)
+            my_program.quadruple_number += 1
+        else:
+            print('Operation type mismatch at {0}'.format(p.lexer.lineno))
+            sys.exit()
+
+
 
 def p_condition(p):
     '''condition : IF LPAREN super_expression RPAREN block else'''
@@ -160,22 +194,36 @@ def p_else(p):
             | empty'''
 
 def p_super_expression(p):
-    '''super_expression : negation expression
-                        | negation expression AND negation expression
-                        | negation expression OR negation expression'''
+    '''super_expression : negation expression sol_action
+                        | negation expression sol_action AND pop_action negation super_expression
+                        | negation expression sol_action OR pop_action negation super_expression'''
+
+# Solve logical operations
+def p_sol_action(p):
+    '''sol_action : '''
+    if len(my_program.operator_stack) > 0 and len(my_program.operand_stack) > 1:
+        if my_program.operator_stack[-1] == 'and' or my_program.operator_stack[-1] == 'or':
+            solve_operation(p)
 
 def p_negation(p):
     '''negation : NOT
                 | empty'''
 
 def p_expression(p):
-    '''expression : exp
-                  | exp GT exp
-                  | exp LT exp
-                  | exp LE exp
-                  | exp GE exp
-                  | exp EQ exp
-                  | exp NE exp'''
+    '''expression : exp sor_action
+                  | exp GT pop_action exp sor_action
+                  | exp LT pop_action exp sor_action
+                  | exp LE pop_action exp sor_action
+                  | exp GE pop_action exp sor_action
+                  | exp EQ pop_action exp sor_action
+                  | exp NE pop_action exp sor_action'''
+
+# Solve relational operations
+def p_sor_action(p):
+    '''sor_action : '''
+    if len(my_program.operator_stack) > 0 and len(my_program.operand_stack) > 1:
+        if my_program.operator_stack[-1] in my_program.relational_operations:
+            solve_operation(p)
 
 def p_exp(p):
     '''exp : term sot_action
@@ -351,23 +399,22 @@ def solve_operation(p):
     result_type = my_program.semantic_cube.get_semantic_type(left_type ,
         right_type, operator)
 
-
     if result_type != 'error':
         my_program.temporal_variable_counter += 1
         temporal_variable = "t" + str(my_program.temporal_variable_counter)
 
         # Creates the quadruple
-        quadruple = Quadruple(operator, left_operand, right_operand , temporal_variable)
+        quadruple = Quadruple(my_program.quadruple_number, operator, left_operand,
+            right_operand , temporal_variable)
 
         # Adds the quadruple to its list and the results to the stacks
         my_program.quadruple_list.append(quadruple)
+        my_program.quadruple_number += 1 
         my_program.operand_stack.append(temporal_variable)
         my_program.type_stack.append(result_type)
     else:
         print('Operation type mismatch at {0}'.format(p.lexer.lineno))
         sys.exit()
-
-
 
 def make_parser():
     parser = yacc.yacc()

@@ -1,6 +1,6 @@
 class VariableTable():
     """A class that contains a list of variables a function has,
-       its name and type"""
+       its names and types"""
 
     def __init__(self):
         """Class constructor"""

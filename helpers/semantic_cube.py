@@ -3,7 +3,7 @@ class SemanticCube():
        between data types """
 
     def __init__(self):
-        """"Class constructor"""
+        """Class constructor"""
         self.cube = {
             "int" : {
                 "int" : {
@@ -13,13 +13,13 @@ class SemanticCube():
                     "/" : "int",
                     "=" : "int",
                     "==" : "bool",
-                    "<>" : "bool",
+                    "!=" : "bool",
                     ">" : "bool",
                     "<" : "bool",
                     ">=" : "bool",
                     "<=" : "bool",
                     "and" : "error",
-                    "not" : "error"
+                    "or" : "error"
                 },
                 "float" : {
                     "+" : "float",
@@ -28,13 +28,13 @@ class SemanticCube():
                     "/" : "float",
                     "=" : "float",
                     "==" : "bool",
-                    "<>" : "bool",
+                    "!=" : "bool",
                     ">" : "bool",
                     "<" : "bool",
                     ">=" : "bool",
                     "<=" : "bool",
-                    "and" : "",
-                    "not" : ""
+                    "and" : "error",
+                    "or" : "error"
                 },
                 "bool" : {
                     "+" : "error",
@@ -43,13 +43,13 @@ class SemanticCube():
                     "/" : "error",
                     "=" : "error",
                     "==" : "error",
-                    "<>" : "error",
+                    "!=" : "error",
                     ">" : "error",
                     "<" : "error",
                     ">=" : "error",
                     "<=" : "error",
                     "and" : "error",
-                    "not" : "error"
+                    "or" : "error"
                 },
                 "string": {
                     "+": "error",
@@ -58,13 +58,13 @@ class SemanticCube():
                     "/": "error",
                     "=": "error",
                     "==": "error",
-                    "<>": "error",
+                    "!=": "error",
                     ">": "error",
                     "<": "error",
                     ">=": "error",
                     "<=": "error",
                     "and": "error",
-                    "not": "error"
+                    "or": "error"
                 }
             },
             "float" : {
@@ -75,13 +75,13 @@ class SemanticCube():
                     "/" : "float",
                     "=" : "float",
                     "==" : "bool",
-                    "<>" : "bool",
+                    "!=" : "bool",
                     ">" : "bool",
                     "<" : "bool",
                     ">=" : "bool",
                     "<=" : "bool",
                     "and" : "error",
-                    "not" : "error"
+                    "or" : "error"
                 },
                 "float" : {
                     "+" : "float",
@@ -90,13 +90,13 @@ class SemanticCube():
                     "/" : "float",
                     "=" : "float",
                     "==" : "bool",
-                    "<>" : "bool",
+                    "!=" : "bool",
                     ">" : "bool",
                     "<" : "bool",
                     ">=" : "bool",
                     "<=" : "bool",
                     "and" : "error",
-                    "not" : "error"
+                    "or" : "error"
                 },
                 "bool" : {
                     "+" : "error",
@@ -105,13 +105,13 @@ class SemanticCube():
                     "/" : "error",
                     "=" : "error",
                     "==" : "error",
-                    "<>" : "error",
+                    "!=" : "error",
                     ">" : "error",
                     "<" : "error",
                     ">=" : "error",
                     "<=" : "error",
                     "and" : "error",
-                    "not" : "error"
+                    "or" : "error"
                 },
                 "string": {
                     "+": "error",
@@ -120,13 +120,13 @@ class SemanticCube():
                     "/": "error",
                     "=": "error",
                     "==": "error",
-                    "<>": "error",
+                    "!=": "error",
                     ">": "error",
                     "<": "error",
                     ">=": "error",
                     "<=": "error",
                     "and": "error",
-                    "not": "error"
+                    "or": "error"
                 }
             },
             "bool" : {
@@ -137,13 +137,13 @@ class SemanticCube():
                     "/" : "error",
                     "=" : "error",
                     "==" : "error",
-                    "<>" : "error",
+                    "!=" : "error",
                     ">" : "error",
                     "<" : "error",
                     ">=" : "error",
                     "<=" : "error",
                     "and" : "error",
-                    "not" : "error"
+                    "or" : "error"
                 },
                 "float" : {
                     "+" : "error",
@@ -152,13 +152,13 @@ class SemanticCube():
                     "/" : "error",
                     "=" : "error",
                     "==" : "error",
-                    "<>" : "error",
+                    "!=" : "error",
                     ">" : "error",
                     "<" : "error",
                     ">=" : "error",
                     "<=" : "error",
                     "and" : "error",
-                    "not" : "error"
+                    "or" : "error"
                 },
                 "bool" : {
                     "+" : "error",
@@ -167,13 +167,13 @@ class SemanticCube():
                     "/" : "error",
                     "=" : "bool",
                     "==" : "bool",
-                    "<>" : "bool",
+                    "!=" : "bool",
                     ">" : "error",
                     "<" : "error",
                     ">=" : "error",
                     "<=" : "error",
                     "and" : "bool",
-                    "not" : "bool"
+                    "or" : "bool"
                 },
                 "string": {
                     "+": "error",
@@ -182,13 +182,13 @@ class SemanticCube():
                     "/": "error",
                     "=": "error",
                     "==": "error",
-                    "<>": "error",
+                    "!=": "error",
                     ">": "error",
                     "<": "error",
                     ">=": "error",
                     "<=": "error",
                     "and": "error",
-                    "not": "error"
+                    "or": "error"
                 }
             },
             "string": {
@@ -199,13 +199,13 @@ class SemanticCube():
                     "/": "error",
                     "=": "error",
                     "==": "error",
-                    "<>": "error",
+                    "!=": "error",
                     ">": "error",
                     "<": "error",
                     ">=": "error",
                     "<=": "error",
                     "and": "error",
-                    "not": "error"
+                    "or": "error"
                 },
                 "float": {
                     "+": "error",
@@ -214,13 +214,13 @@ class SemanticCube():
                     "/": "error",
                     "=": "error",
                     "==": "error",
-                    "<>": "error",
+                    "!=": "error",
                     ">": "error",
                     "<": "error",
                     ">=": "error",
                     "<=": "error",
                     "and": "error",
-                    "not": "error"
+                    "or": "error"
                 },
                 "bool": {
                     "+": "error",
@@ -229,13 +229,13 @@ class SemanticCube():
                     "/": "error",
                     "=": "error",
                     "==": "error",
-                    "<>": "error",
+                    "!=": "error",
                     ">": "error",
                     "<": "error",
                     ">=": "error",
                     "<=": "error",
                     "and": "error",
-                    "not": "error"
+                    "or": "error"
                 },
                 "string": {
                     "+": "string",
@@ -244,13 +244,13 @@ class SemanticCube():
                     "/": "error",
                     "=": "string",
                     "==": "bool",
-                    "<>": "bool",
+                    "!=": "bool",
                     ">": "error",
                     "<": "error",
                     ">=": "error",
                     "<=": "error",
                     "and": "error",
-                    "not": "error"
+                    "or": "error"
                 }
             }
         }

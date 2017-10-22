@@ -1,8 +1,10 @@
 program my_program;
 
-var a, b, c, d, e, f, g, h ,i, j : int;
+var a, b: int;
+var c: bool;
 
 main {
-	var k : float;
-	k = a * (b + c / d * e - f * g) + h - i * j;
+	if (( 3 < 4) or (4 != 3)) {
+
+	}
 }
