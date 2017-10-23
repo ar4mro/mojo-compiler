@@ -21,8 +21,11 @@
 # sor_action -> Solve relational operations
 # sol_action -> Solve logical operations
 # soa_action -> Solve assignment
-# abm -> Add bottom mark
-# rbm -> Remove bottom mark
+# abm_action -> Add bottom mark
+# rbm_action -> Remove bottom mark
+# cif_action -> Create if conditional quadruple
+# sif_action -> Solve if conditional quadruple
+# cel_action -> Create else quadruple
 
 import sys
 import ply.yacc as yacc
@@ -187,11 +190,47 @@ def p_soa_action(p):
 
 
 def p_condition(p):
-    '''condition : IF LPAREN super_expression RPAREN block else'''
+    '''condition : IF LPAREN super_expression RPAREN cif_action block else sif_action'''
+
+# Create if conditional quadruple
+def p_cif_action(p):
+    '''cif_action : '''
+    type_result = my_program.type_stack.pop()
+
+    if type_result != 'bool':
+        print('Operation type mismatch in line {0}'.format(p.lexer.lineno))
+        sys.exit();
+    else:
+        result = my_program.operand_stack.pop()
+        quadruple = Quadruple(my_program.quadruple_number, 'GoToF', result, None, None)
+        my_program.quadruple_list.append(quadruple)
+
+        my_program.jump_list.append(my_program.quadruple_number - 1)
+        my_program.quadruple_number += 1
 
 def p_else(p):
-    '''else : ELSE block
+    '''else : ELSE cel_action block
             | empty'''
+
+# Create else quadruple
+def p_cel_action(p):
+    '''cel_action : '''
+    quadruple = Quadruple(my_program.quadruple_number, 'GoTo', None, None, None)
+    my_program.quadruple_list.append(quadruple)
+
+    quadruple_to_solve_number = my_program.jump_list.pop()
+    my_program.jump_list.append(my_program.quadruple_number - 1)
+
+    my_program.quadruple_number += 1
+
+    quadruple = my_program.quadruple_list[quadruple_to_solve_number]
+    quadruple.fill_quadruple_jump(my_program.quadruple_number)
+
+def p_sif_action(p):
+    '''sif_action : '''
+    quadruple_to_solve_number = my_program.jump_list.pop()
+    quadruple = my_program.quadruple_list[quadruple_to_solve_number]
+    quadruple.fill_quadruple_jump(my_program.quadruple_number)
 
 def p_super_expression(p):
     '''super_expression : negation expression sol_action
@@ -409,7 +448,7 @@ def solve_operation(p):
 
         # Adds the quadruple to its list and the results to the stacks
         my_program.quadruple_list.append(quadruple)
-        my_program.quadruple_number += 1 
+        my_program.quadruple_number += 1
         my_program.operand_stack.append(temporal_variable)
         my_program.type_stack.append(result_type)
     else:

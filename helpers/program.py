@@ -16,8 +16,9 @@ class Program():
         self.type_stack = []
         self.operator_stack = []
         self.quadruple_list = []
+        self.jump_list = []
         self.temporal_variable_counter = 0
-        self.quadruple_number = 1 
+        self.quadruple_number = 1
         self.relational_operations = ['>', '<', '>=', '<=', '==', '!=']
 
     def print_stacks(self):
