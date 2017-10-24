@@ -2,23 +2,14 @@ program my_program;
 
 var a, b, c, d: int;
 
-
 main {
-		if (a+b > d)
-		{
-			if(a < b)
-			{
-				a = 0;
-				b = b + d;
-			}
-			else
-			{
-				c = a + b;
-			}
+	if (c == d) {
+		while(5 > a) {
+			a = a + 1;
 		}
-		else
-		{
-			a = b + c;
-		}
-		d = b + a * c; 
+		b = a + c;
+	} else {
+		c = d;
+	}
+	c = c * 3;
 }

@@ -26,6 +26,8 @@
 # cif_action -> Create if conditional quadruple
 # sif_action -> Solve if conditional quadruple
 # cel_action -> Create else quadruple
+# cwl_action -> Creates the while quadruple
+# swl_action -> Solves the while quadruple
 
 import sys
 import ply.yacc as yacc
@@ -192,21 +194,10 @@ def p_soa_action(p):
 def p_condition(p):
     '''condition : IF LPAREN super_expression RPAREN cif_action block else sif_action'''
 
-# Create if conditional quadruple
+# Create if conditional quadruple action
 def p_cif_action(p):
     '''cif_action : '''
-    type_result = my_program.type_stack.pop()
-
-    if type_result != 'bool':
-        print('Operation type mismatch in line {0}'.format(p.lexer.lineno))
-        sys.exit();
-    else:
-        result = my_program.operand_stack.pop()
-        quadruple = Quadruple(my_program.quadruple_number, 'GoToF', result, None, None)
-        my_program.quadruple_list.append(quadruple)
-
-        my_program.jump_list.append(my_program.quadruple_number - 1)
-        my_program.quadruple_number += 1
+    create_conditional_quadruple(p)
 
 def p_else(p):
     '''else : ELSE cel_action block
@@ -215,21 +206,30 @@ def p_else(p):
 # Create else quadruple
 def p_cel_action(p):
     '''cel_action : '''
+    # Creates the GoTo quadruple
     quadruple = Quadruple(my_program.quadruple_number, 'GoTo', None, None, None)
     my_program.quadruple_list.append(quadruple)
 
-    quadruple_to_solve_number = my_program.jump_list.pop()
-    my_program.jump_list.append(my_program.quadruple_number - 1)
+    # Gets the number of the GotoF quadruple to be filled
+    quadruple_number_to_fill = my_program.jump_list.pop()
+    quadruple = my_program.quadruple_list[quadruple_number_to_fill]
 
+    # Stores the actual quadruple_number GoTo in the jump list
+    my_program.jump_list.append(my_program.quadruple_number - 1)
     my_program.quadruple_number += 1
 
-    quadruple = my_program.quadruple_list[quadruple_to_solve_number]
+    # Fills the pending GoToF quadruple with the number of the next quadruple
+    # after GoTo was created
     quadruple.fill_quadruple_jump(my_program.quadruple_number)
 
+#
 def p_sif_action(p):
     '''sif_action : '''
-    quadruple_to_solve_number = my_program.jump_list.pop()
-    quadruple = my_program.quadruple_list[quadruple_to_solve_number]
+    # Gets the number of the GotoF quadruple to be filled
+    quadruple_number_to_fill = my_program.jump_list.pop()
+    quadruple = my_program.quadruple_list[quadruple_number_to_fill]
+
+    # Fills the pending GoToF quadruple with the number of the next quadruple
     quadruple.fill_quadruple_jump(my_program.quadruple_number)
 
 def p_super_expression(p):
@@ -378,7 +378,29 @@ def p_list_call(p):
                  | empty'''
 
 def p_loop(p):
-    '''loop : WHILE LPAREN super_expression RPAREN block'''
+    '''loop : WHILE cwl_action LPAREN super_expression RPAREN cif_action block swl_action'''
+
+# Stores the actual quaduple number
+def p_cwl_action(p):
+    '''cwl_action : '''
+    my_program.jump_list.append(my_program.quadruple_number)
+
+def p_swl_action(p):
+    '''swl_action : '''
+    # Gets the number of the GotoF quadruple and where the while starts
+    quadruple_number_to_fill = my_program.jump_list.pop()
+    quadruple_number_to_return = my_program.jump_list.pop()
+
+    while_quadruple = Quadruple(my_program.quadruple_number, 'GoTo', None, None,
+        quadruple_number_to_return)
+
+    my_program.quadruple_list.append(while_quadruple)
+    my_program.quadruple_number += 1
+
+    conditional_quadruple = my_program.quadruple_list[quadruple_number_to_fill]
+    # Fills the pending GoToF quadruple with the number of the next quadruple
+    conditional_quadruple.fill_quadruple_jump(my_program.quadruple_number)
+
 
 def p_function_call(p):
     '''function_call : ID LPAREN arguments RPAREN'''
@@ -424,7 +446,6 @@ def p_error(p):
 
 def solve_operation(p):
     """Solve an operation from the stacks"""
-
     # Gets the operands and its types
     right_operand = my_program.operand_stack.pop()
     right_type = my_program.type_stack.pop()
@@ -454,6 +475,24 @@ def solve_operation(p):
     else:
         print('Operation type mismatch at {0}'.format(p.lexer.lineno))
         sys.exit()
+
+def create_conditional_quadruple(p):
+    """Creates the quadruple when an if or a while is reached"""
+    type_result = my_program.type_stack.pop()
+
+    # It makes no action when the result's type is not a boolean
+    if type_result != 'bool':
+        print('Operation type mismatch in line {0}'.format(p.lexer.lineno))
+        sys.exit();
+    else:
+        # Creates the GotoF quadruple
+        result = my_program.operand_stack.pop()
+        quadruple = Quadruple(my_program.quadruple_number, 'GoToF', result, None, None)
+        my_program.quadruple_list.append(quadruple)
+
+        # Stores the number of the GotoF quaduple in order to be filled later
+        my_program.jump_list.append(my_program.quadruple_number - 1)
+        my_program.quadruple_number += 1
 
 def make_parser():
     parser = yacc.yacc()
