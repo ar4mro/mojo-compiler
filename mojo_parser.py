@@ -26,6 +26,9 @@
 # cif_action -> Create if conditional quadruple
 # sif_action -> Solve if conditional quadruple
 # cel_action -> Create else quadruple
+# cwl_action -> Create while quadruple
+# swl_action -> Solve while quadruple
+# iwl_action -> Initiates the while (Flags the start jump of while)
 
 import sys
 import ply.yacc as yacc
@@ -378,7 +381,51 @@ def p_list_call(p):
                  | empty'''
 
 def p_loop(p):
-    '''loop : WHILE LPAREN super_expression RPAREN block'''
+    '''loop : WHILE iwl_action LPAREN super_expression RPAREN cwl_action block swl_action'''
+    
+# While starts
+def p_iwl_action(p):
+    '''iwl_action : '''
+    my_program.jump_list.append(my_program.quadruple_number)
+
+# Create while quadruple
+def p_cwl_action(p):
+    '''cwl_action : '''
+    type_result = my_program.type_stack.pop()
+
+    if type_result != 'bool':
+        print('Operation type mismatch in line {0}'.format(p.lexer.lineno))
+        sys.exit();
+    else:
+        result = my_program.operand_stack.pop()
+        quadruple = Quadruple(my_program.quadruple_number, 'GoToF', result, None, None)
+        my_program.quadruple_list.append(quadruple)
+
+        my_program.jump_list.append(my_program.quadruple_number - 1)
+        my_program.quadruple_number += 1
+
+# Solve while quadruple
+def p_swl_action(p):
+    '''swl_action : '''
+    #print(my_program.jump_list);
+    end = my_program.jump_list.pop()
+    ret = my_program.jump_list.pop()
+    #print("this is end: ",end);
+    #print("this is ret: ",ret);
+
+
+    quadruple = Quadruple(my_program.quadruple_number, 'GoTo', None, None, ret)
+    my_program.quadruple_list.append(quadruple)
+    
+    my_program.quadruple_number += 1
+
+    quadruple_to_solve_number = end
+    quadruple = my_program.quadruple_list[quadruple_to_solve_number]
+    quadruple.fill_quadruple_jump(my_program.quadruple_number)
+    
+
+
+
 
 def p_function_call(p):
     '''function_call : ID LPAREN arguments RPAREN'''
