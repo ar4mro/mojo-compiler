@@ -1,4 +1,4 @@
-import json
+import json # Used to give format at printing dictionaries
 
 from .variable_table import VariableTable
 
@@ -10,14 +10,31 @@ class FunctionDirectory():
         """Class constructor"""
         self.function_list = {}
 
-    def add_function(self, function_type, function_name,
-            function_parameter_list = []):
+    def add_function(self, function_name, function_type,
+            function_parameter_list = [], function_parameter_adresses = []):
         """Adds a function to the list"""
         self.function_list[function_name] = {
             'name' : function_name,
             'return_type' : function_type,
-            'parameters' : function_parameter_list,
-            'variables': VariableTable()
+            'quadruple_number' : -1,
+            'parameters' : {
+                'types' : function_parameter_list,
+                'addresses' : function_parameter_adresses,
+
+            },
+            'variables': VariableTable(),
+            'number_of_local_variables' : {
+                'int' : 0,
+                'float' : 0,
+                'string' : 0,
+                'bool' : 0
+            },
+            'number_of_temporal_variables' : {
+                'int' : 0,
+                'float' : 0,
+                'string' : 0,
+                'bool' : 0
+            }
         }
 
     def has_function(self, function_name):
@@ -36,7 +53,7 @@ class FunctionDirectory():
         """Adds a parameter to its function"""
         function = self.get_function(function_name)
         if function is not None:
-            function['parameters'] = parameter_list
+            function['parameters']['types'] = parameter_list
         else:
             print("The function you are trying to add the paremeter doesnt exist")
 
@@ -48,7 +65,10 @@ class FunctionDirectory():
             if function['variables'].has_variable(variable_name):
                 print("This function already has a variable with that name")
             else:
+                # Adds the varaible to the variable table and increments the
+                # number of local variables the function will use
                 function['variables'].add_variable(variable_type, variable_name)
+                function['number_of_local_variables'][variable_type] += 1
         else:
             print("The function you are trying to add the variable doesnt exist")
 
@@ -64,18 +84,32 @@ class FunctionDirectory():
                 return None
         else:
             print("The function you are trying to find when looking for the" +
-                "variable doesnt exists")
+                "variable doesn't exists")
+
+    def set_function_quadruple_number(self, function_name, quadruple_number):
+        """Establish where the procedure starts"""
+        function = self.get_function(function_name)
+        if function is not None:
+            function['quadruple_number'] = quadruple_number
+        else:
+            print("The function you are trying to set the quadruple doesn't exists")
 
     def print_directory(self):
         """Prints the list of functions and its properties"""
         for function, properties in self.function_list.items():
             print("function : " + function)
 
-            # Prints the variable table only if the value is ans instance of
+            # Prints the variable table only if the value is an instance of
             # the class
             for prop, value in properties.items():
                 if isinstance(value, VariableTable):
                     print("  " + str(prop) + " : " +
                         json.dumps(value.variable_list, indent=4))
+                elif isinstance(value, dict):
+                    print("  " + str(prop) + " : " +
+                        json.dumps(value, indent=4))
                 else:
                     print("  " + str(prop) + " : " + str(value))
+
+            # Prints a dashed line
+            print("-" * 80)

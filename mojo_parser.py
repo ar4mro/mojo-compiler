@@ -28,6 +28,7 @@
 # cel_action -> Create else quadruple
 # cwl_action -> Creates the while quadruple
 # swl_action -> Solves the while quadruple
+# enp_action -> Ends the procedure closing with a quadruple
 
 import sys
 import ply.yacc as yacc
@@ -50,7 +51,7 @@ def p_cfd_action(p):
     my_program.current_scope = p[-1]
 
     # Adds the program, the global scope, to the directory
-    my_program.function_directory.add_function('void', my_program.global_scope)
+    my_program.function_directory.add_function(my_program.global_scope, 'void')
 
 def p_vars(p):
     '''vars : VAR ID list_declaration more_vars COLON type adv_action SEMICOLON vars
@@ -85,7 +86,7 @@ def p_adv_action(p):
     del my_program.temporal_variables[:]
 
 def p_functions(p):
-    '''functions : DEF function_type ID LPAREN parameters RPAREN adf_action block functions
+    '''functions : DEF function_type ID LPAREN parameters RPAREN adf_action block enp_action functions
                  | empty'''
 
 def p_function_type(p):
@@ -104,8 +105,10 @@ def p_more_parameters(p):
     # are found from the last one to the first one, they need to be inserted
     # in the first index to keep the order
     if p[-1] is not None:
+        parameter_name = p[-1]
         parameter_type = p[-2]
-        my_program.temporal_parameters.insert(0, parameter_type)
+        my_program.temporal_parameters_names.insert(0, parameter_name)
+        my_program.temporal_parameters_types.insert(0, parameter_type)
 
 def p_type(p):
     '''type : INT
@@ -117,25 +120,51 @@ def p_type(p):
 # Adds a new function and its parameters to the directory
 def p_adf_action(p):
     '''adf_action : '''
+    ### 1. Need to separate space in the global memory for the return value if its
+    ### not a void function, the whole function acts like a variable in te global memory
+    ### 2. Validate the te funcion hasn't been declared yet
+
     # Determines the name of the function and its type
     my_program.current_scope = p[-4]
     function_type = p[-5]
 
     # Adds the function to the directory
-    my_program.function_directory.add_function(function_type, my_program.current_scope)
+    my_program.function_directory.add_function(my_program.current_scope, function_type)
 
-    # Adds the parameters to the function
+    # Sets the starting quadruple of the function
+    my_program.function_directory.set_function_quadruple_number(my_program.current_scope,
+        my_program.quadruple_number)
+
+    # Adds the parameters signature to the function
     my_program.function_directory.add_parameter_to_function(my_program.current_scope,
-            list(my_program.temporal_parameters))
+            list(my_program.temporal_parameters_types))
 
-    # Cleras the temporal parameters
-    del my_program.temporal_parameters[:]
+    # Adds the parameters to the function variable table
+    parameters = zip(my_program.temporal_parameters_names,
+        my_program.temporal_parameters_types)
+
+    for parameter_name, parameter_type in parameters:
+        my_program.function_directory.add_variable_to_function(
+                my_program.current_scope, parameter_type, parameter_name)
+
+    # Clears the temporal parameters
+    del my_program.temporal_parameters_names[:]
+    del my_program.temporal_parameters_types[:]
+
+# Creates the quadruple that indicates the end of the procedure
+def p_enp_action(p):
+    '''enp_action : '''
+    quadruple = Quadruple(my_program.quadruple_number, 'ENDPROC', None, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1 
 
 # Adds the main function to function directory
 def p_amf_action(p):
     '''amf_action : '''
     my_program.current_scope = p[-1]
-    my_program.function_directory.add_function('void', my_program.current_scope)
+    my_program.function_directory.add_function(my_program.current_scope, 'void')
+    my_program.function_directory.set_function_quadruple_number(my_program.current_scope,
+        my_program.quadruple_number)
 
 def p_block(p):
     '''block : LBRACE vars statements RBRACE'''
@@ -499,15 +528,15 @@ def make_parser():
 
     #print("Name of the file to be parsed")
     #file_name = input()
-    file_name = 'code_test.txt'
+    file_name = 'code_test2.txt'
 
     with open(file_name) as file_object:
         code = file_object.read()
         parser.parse(code)
 
-    #my_program.function_directory.print_directory()
-    #print(str(my_program.temporal_parameters))
-    my_program.print_stacks()
+    my_program.function_directory.print_directory()
+    #print(str(my_program.temporal_parameters_types))
+    #my_program.print_stacks()
     my_program.print_quadruples()
 
     return parser

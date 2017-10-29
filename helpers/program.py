@@ -11,7 +11,8 @@ class Program():
         self.function_directory = FunctionDirectory()
         self.semantic_cube = SemanticCube()
         self.temporal_variables = []
-        self.temporal_parameters = []
+        self.temporal_parameters_names = []
+        self.temporal_parameters_types = []
         self.operand_stack = []
         self.type_stack = []
         self.operator_stack = []

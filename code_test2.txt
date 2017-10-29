@@ -3,16 +3,16 @@ program my_program;
 var foo1, foo2 : int;
 var dummy1 : float;
 
-def int my_function(int parameter1, bool parameter2) {
+def int my_function(int par1, bool par2) {
 	var foo3, foo4 : int;
+	foo1 = par1 + 3 / (6 + 5);
 }
 
-def int my_function2(float parameter1, bool parameter2) {
-	var foo5, foo6 : float;
+def bool my_funcion2(string parX) {
+	foo1 = 20 - foo2 * (4 - 5);
+	return parX;
 }
 
 main {
-
+	foo1 = foo2 * 3 - 4;
 }
-
-4 + 5.0 * C  

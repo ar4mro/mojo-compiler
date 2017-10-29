@@ -6,11 +6,13 @@ class VariableTable():
         """Class constructor"""
         self.variable_list = {}
 
-    def add_variable(self, variable_type, variable_name):
+    def add_variable(self, variable_type, variable_name,
+            variable_memory_adress = 0):
         """Adds a variable to the list """
         self.variable_list[variable_name] = {
             'name' : variable_name,
             'type' : variable_type,
+            'memory_adress' : variable_memory_adress
         }
 
     def has_variable(self, variable_name):
