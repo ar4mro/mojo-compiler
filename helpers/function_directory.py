@@ -86,6 +86,15 @@ class FunctionDirectory():
             print("The function you are trying to find when looking for the" +
                 "variable doesn't exists")
 
+    def get_function_parameters(self, function_name):
+        """Returns the parameters of the function if exists"""
+        function = self.get_function(function_name)
+        if function is not None:
+            return function['parameters']
+        else:
+            print("The function you are trying to retrieve its parameters" +
+                "doesnt exists")
+
     def set_function_quadruple_number(self, function_name, quadruple_number):
         """Establish where the procedure starts"""
         function = self.get_function(function_name)
@@ -93,6 +102,14 @@ class FunctionDirectory():
             function['quadruple_number'] = quadruple_number
         else:
             print("The function you are trying to set the quadruple doesn't exists")
+
+    def get_function_quadruple_number(self, function_name,):
+        """Retrieves the quadruple number of a function"""
+        function = self.get_function(function_name)
+        if function is not None:
+            return function['quadruple_number']
+        else:
+            print("The function you are trying to retrieve its quadruple doesn't exists")
 
     def print_directory(self):
         """Prints the list of functions and its properties"""

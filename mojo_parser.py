@@ -29,6 +29,9 @@
 # cwl_action -> Creates the while quadruple
 # swl_action -> Solves the while quadruple
 # enp_action -> Ends the procedure closing with a quadruple
+# cra_action -> Creates de era quadruple action
+# sar_action -> Solve argument
+# sfc_action -> Solve function call
 
 import sys
 import ply.yacc as yacc
@@ -156,7 +159,7 @@ def p_enp_action(p):
     '''enp_action : '''
     quadruple = Quadruple(my_program.quadruple_number, 'ENDPROC', None, None, None)
     my_program.quadruple_list.append(quadruple)
-    my_program.quadruple_number += 1 
+    my_program.quadruple_number += 1
 
 # Adds the main function to function directory
 def p_amf_action(p):
@@ -178,7 +181,7 @@ def p_statement(p):
                  | condition
                  | write
                  | loop
-                 | function_call
+                 | procedure_call
                  | predefined_function_call
                  | return'''
 
@@ -430,17 +433,79 @@ def p_swl_action(p):
     # Fills the pending GoToF quadruple with the number of the next quadruple
     conditional_quadruple.fill_quadruple_jump(my_program.quadruple_number)
 
+def p_procedure_call(p):
+    '''procedure_call : ID LPAREN cra_action arguments RPAREN sfc_action SEMICOLON'''
 
 def p_function_call(p):
-    '''function_call : ID LPAREN arguments RPAREN'''
+    '''function_call : ID LPAREN cra_action arguments RPAREN sfc_action'''
+
+# Checks if the function directory has the function called and creates its
+# ERA action
+def p_cra_action(p):
+    '''cra_action : '''
+    function = p[-2]
+    # Checks if the function exists
+    if my_program.function_directory.has_function(function):
+        # Creates its quadruple action
+        quadruple = Quadruple(my_program.quadruple_number, 'ERA', function, None, None)
+        my_program.quadruple_list.append(quadruple)
+        my_program.quadruple_number += 1
+
+        # Retrieves the parameters of the function
+        parameters = my_program.function_directory.get_function_parameters(function)
+        my_program.temporal_arguments_types = list(parameters['types'])
+    else:
+        print("The function " + function + " you are trying to call doesn't exists")
+        sys.exit()
 
 def p_arguments(p):
-    '''arguments : var_const more_arguments
+    '''arguments : super_expression sar_action more_arguments
                  | empty'''
 
 def p_more_arguments(p):
-    '''more_arguments : COMMA var_const more_arguments
+    '''more_arguments : COMMA super_expression sar_action more_arguments
                       | empty'''
+
+# Solve argument
+def p_sar_action(p):
+    '''sar_action : '''
+    # If there are more arguments than parameters
+    if my_program.temporal_arguments_types:
+        # Gets the argument and its type from the stacks
+        argument = my_program.operand_stack.pop()
+        argument_type = my_program.type_stack.pop()
+        parameter_type = my_program.temporal_arguments_types.pop(0)
+
+        # Creates the quadruple for the parameter
+        if argument_type == parameter_type:
+            quadruple = Quadruple(my_program.quadruple_number, 'PARAMETER', argument,
+                None, None)
+            my_program.quadruple_list.append(quadruple)
+            my_program.quadruple_number += 1
+        else:
+            print('Argument type mismatch at {0} line '.format(p.lexer.lineno))
+            sys.exit()
+    else:
+        print('Agument number mismatch at {0} line '.format(p.lexer.lineno))
+        sys.exit()
+
+# Solves the function-procedure called
+def p_sfc_action(p):
+    '''sfc_action : '''
+    # If there are more parameters than arguments
+    if not my_program.temporal_arguments_types:
+        # Retrieves the function and is quadruple number
+        function = p[-5]
+        function_quadruple_number = my_program.function_directory.get_function_quadruple_number(function)
+
+        # Creates its call quadruple
+        quadruple = Quadruple(my_program.quadruple_number, 'GOSUB', function,
+            None, function_quadruple_number)
+        my_program.quadruple_list.append(quadruple)
+        my_program.quadruple_number += 1
+    else:
+        print('Argument number mismatch at {0} line '.format(p.lexer.lineno))
+        sys.exit()
 
 def p_predefined_function_call(p):
     '''predefined_function_call : CREATE_TURTLE LPAREN RPAREN SEMICOLON
@@ -534,7 +599,7 @@ def make_parser():
         code = file_object.read()
         parser.parse(code)
 
-    my_program.function_directory.print_directory()
+    #my_program.function_directory.print_directory()
     #print(str(my_program.temporal_parameters_types))
     #my_program.print_stacks()
     my_program.print_quadruples()

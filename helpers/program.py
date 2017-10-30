@@ -13,6 +13,7 @@ class Program():
         self.temporal_variables = []
         self.temporal_parameters_names = []
         self.temporal_parameters_types = []
+        self.temporal_arguments_types = []
         self.operand_stack = []
         self.type_stack = []
         self.operator_stack = []
