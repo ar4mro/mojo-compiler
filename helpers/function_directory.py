@@ -86,6 +86,15 @@ class FunctionDirectory():
             print("The function you are trying to find when looking for the" +
                 "variable doesn't exists")
 
+    def get_function_type(self, function_name):
+        """Looks for the type of the function"""""
+        function = self.get_function(function_name)
+        if function is not None:
+            function_type = function['return_type']
+            return function_type
+        else:
+            print("This function doesn't exists")
+
     def get_function_parameters(self, function_name):
         """Returns the parameters of the function if exists"""
         function = self.get_function(function_name)

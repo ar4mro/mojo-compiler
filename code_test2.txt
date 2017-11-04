@@ -6,12 +6,20 @@ var dummy1 : float;
 def int my_function(int par1, int par2) {
 	var foo3, foo4 : int;
 	foo1 = par1 + 3 / (6 + 5);
+
+	if (5 > 7 - 3) {
+		foo1 = foo1 + 1;
+		return foo1;
+	} else {
+		foo2 = dummy1 * 3;
+		return foo2;
+	}
+
+	foo3 = foo4 - foo1;
 }
 
-def bool my_function2(string parX) {
+def void my_function2(string parX) {
 	foo1 = 20 - foo2 * (4 - 5);
-	my_function(4 - 5, 5 * (3 - 5));
-	return parX;
 }
 
 main {

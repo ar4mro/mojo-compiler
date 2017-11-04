@@ -19,9 +19,11 @@ class Program():
         self.operator_stack = []
         self.quadruple_list = []
         self.jump_list = []
+        self.return_list = []
         self.temporal_variable_counter = 0
         self.quadruple_number = 1
         self.relational_operations = ['>', '<', '>=', '<=', '==', '!=']
+        self.return_flag = False
 
     def print_stacks(self):
         """Print the temporal stacks of  the program"""

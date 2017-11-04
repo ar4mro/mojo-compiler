@@ -28,10 +28,12 @@
 # cel_action -> Create else quadruple
 # cwl_action -> Creates the while quadruple
 # swl_action -> Solves the while quadruple
-# enp_action -> Ends the procedure closing with a quadruple
+# enp_action -> Ends the procedure closing with a quadruple and solve returns
 # cra_action -> Creates de era quadruple action
 # sar_action -> Solve argument
 # sfc_action -> Solve function call
+# srf_action -> Sets on the return flag and creates its quadruples
+# vtc_action -> Verifies the type of the procedure call
 
 import sys
 import ply.yacc as yacc
@@ -157,9 +159,31 @@ def p_adf_action(p):
 # Creates the quadruple that indicates the end of the procedure
 def p_enp_action(p):
     '''enp_action : '''
-    quadruple = Quadruple(my_program.quadruple_number, 'ENDPROC', None, None, None)
-    my_program.quadruple_list.append(quadruple)
+    function_type = p[-7]
+
+    # Checks if the functions and procedures have the correct return semantics
+    if function_type == 'void' and my_program.return_flag:
+        print('Function {0} of type {1} should not have return statement.'.format(
+            my_program.current_scope, function_type))
+        sys.exit()
+    elif function_type != 'void' and not my_program.return_flag:
+        print('Function {0} of type {1} should have return statement.'.format(
+            my_program.current_scope, function_type))
+        sys.exit()
+    else:
+        # Creates the end of function quadruple
+        quadruple = Quadruple(my_program.quadruple_number, 'ENDPROC', None, None, None)
+        my_program.quadruple_list.append(quadruple)
+
+    # Fills the returns quadruples if exist
+    if my_program.return_flag:
+        while my_program.return_list:
+            quadruple_number_to_fill = my_program.return_list.pop()
+            my_program.quadruple_list[quadruple_number_to_fill - 1].fill_quadruple_jump(
+                my_program.quadruple_number)
+
     my_program.quadruple_number += 1
+    my_program.return_flag = False
 
 # Adds the main function to function directory
 def p_amf_action(p):
@@ -239,7 +263,7 @@ def p_else(p):
 def p_cel_action(p):
     '''cel_action : '''
     # Creates the GoTo quadruple
-    quadruple = Quadruple(my_program.quadruple_number, 'GoTo', None, None, None)
+    quadruple = Quadruple(my_program.quadruple_number, 'GOTO', None, None, None)
     my_program.quadruple_list.append(quadruple)
 
     # Gets the number of the GotoF quadruple to be filled
@@ -423,7 +447,7 @@ def p_swl_action(p):
     quadruple_number_to_fill = my_program.jump_list.pop()
     quadruple_number_to_return = my_program.jump_list.pop()
 
-    while_quadruple = Quadruple(my_program.quadruple_number, 'GoTo', None, None,
+    while_quadruple = Quadruple(my_program.quadruple_number, 'GOTO', None, None,
         quadruple_number_to_return)
 
     my_program.quadruple_list.append(while_quadruple)
@@ -434,10 +458,20 @@ def p_swl_action(p):
     conditional_quadruple.fill_quadruple_jump(my_program.quadruple_number)
 
 def p_procedure_call(p):
-    '''procedure_call : ID LPAREN cra_action arguments RPAREN sfc_action SEMICOLON'''
+    '''procedure_call : ID LPAREN cra_action arguments RPAREN sfc_action vtc_action SEMICOLON'''
 
 def p_function_call(p):
     '''function_call : ID LPAREN cra_action arguments RPAREN sfc_action'''
+
+# Verifies if the procedure call is void type
+def p_vtc_action(p):
+    '''vtc_action : '''
+    function = p[-6]
+    function_type = my_program.function_directory.get_function_type(function)
+
+    if function_type != 'void':
+        print("This function {0} can't be called as a procedure".format(function))
+        sys.exit()
 
 # Checks if the function directory has the function called and creates its
 # ERA action
@@ -526,7 +560,30 @@ def p_predefined_function_call(p):
                                 | DRAW_RECTANGLE LPAREN exp RPAREN SEMICOLON'''
 
 def p_return(p):
-    '''return : RETURN super_expression SEMICOLON'''
+    '''return : RETURN super_expression SEMICOLON srf_action'''
+
+# Sets on the return flag and creates the return quadruples
+def p_srf_action(p):
+    '''srf_action : '''
+    my_program.return_flag = True
+
+    # Gets the return operand and the function been called
+    operand = my_program.operand_stack.pop()
+    operand_type = my_program.type_stack.pop()
+    function_type = my_program.function_directory.get_function_type(
+        my_program.current_scope)
+
+    # Checks if the types match
+    if function_type != operand_type:
+        print("Return type of function {0} doesn't match function return type".format(
+            my_program.current_scope))
+        sys.exit()
+
+    # Creates the returns quadruples and pushes them in a stack to be filled later
+    quadruple = Quadruple(my_program.quadruple_number, 'RETURN', operand, None, None)
+    my_program.return_list.append(my_program.quadruple_number)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
 
 def p_write(p):
     '''write : PRINT LPAREN super_expression RPAREN SEMICOLON'''
@@ -581,7 +638,7 @@ def create_conditional_quadruple(p):
     else:
         # Creates the GotoF quadruple
         result = my_program.operand_stack.pop()
-        quadruple = Quadruple(my_program.quadruple_number, 'GoToF', result, None, None)
+        quadruple = Quadruple(my_program.quadruple_number, 'GOTOF', result, None, None)
         my_program.quadruple_list.append(quadruple)
 
         # Stores the number of the GotoF quaduple in order to be filled later
