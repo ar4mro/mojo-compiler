@@ -1,28 +1,30 @@
 program my_program;
 
-var foo1, foo2 : int;
-var dummy1 : float;
+var i, j : int;
 
-def int my_function(int par1, int par2) {
-	var foo3, foo4 : int;
-	foo1 = par1 + 3 / (6 + 5);
 
-	if (5 > 7 - 3) {
-		foo1 = foo1 + 1;
-		return foo1;
-	} else {
-		foo2 = dummy1 * 3;
-		return foo2;
+def void uno (int a) {
+	var i : int;
+	i = a * 2;
+	if (i < a + 4) {
+		uno(a + 1);
 	}
-
-	foo3 = foo4 - foo1;
+	print(i);
 }
 
-def void my_function2(string parX) {
-	foo1 = 20 - foo2 * (4 - 5);
+def int dos(int b) {
+	b = b * i + j;
+	if (b > 0) {
+		return (b * 2);
+	}
+
+	i = j - 6 * 3;
+	return b;
 }
 
 main {
-	foo1 = foo2 * 3 - 4;
-	my_function2('hola');
+	i = 2;
+	j = i * 2 - 1;
+	uno(j);
+	print(i + dos(i + j));
 }

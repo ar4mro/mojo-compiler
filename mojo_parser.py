@@ -27,6 +27,7 @@
 # sif_action -> Solve if conditional quadruple
 # cel_action -> Create else quadruple
 # cwl_action -> Creates the while quadruple
+# cwr_action -> Creates the write quadruple
 # swl_action -> Solves the while quadruple
 # enp_action -> Ends the procedure closing with a quadruple and solve returns
 # cra_action -> Creates de era quadruple action
@@ -34,6 +35,7 @@
 # sfc_action -> Solve function call
 # srf_action -> Sets on the return flag and creates its quadruples
 # vtc_action -> Verifies the type of the procedure call
+# arf_action -> Adds the result of the function to the stack
 
 import sys
 import ply.yacc as yacc
@@ -139,6 +141,13 @@ def p_adf_action(p):
     # Sets the starting quadruple of the function
     my_program.function_directory.set_function_quadruple_number(my_program.current_scope,
         my_program.quadruple_number)
+
+    if function_type != 'void':
+        # Sets the address return of the function
+        my_program.function_directory.set_function_address(my_program.current_scope,
+            my_program.function_address_helper)
+
+        my_program.function_address_helper += 1
 
     # Adds the parameters signature to the function
     my_program.function_directory.add_parameter_to_function(my_program.current_scope,
@@ -461,7 +470,7 @@ def p_procedure_call(p):
     '''procedure_call : ID LPAREN cra_action arguments RPAREN sfc_action vtc_action SEMICOLON'''
 
 def p_function_call(p):
-    '''function_call : ID LPAREN cra_action arguments RPAREN sfc_action'''
+    '''function_call : ID LPAREN cra_action arguments RPAREN sfc_action arf_action'''
 
 # Verifies if the procedure call is void type
 def p_vtc_action(p):
@@ -541,6 +550,23 @@ def p_sfc_action(p):
         print('Argument number mismatch at {0} line '.format(p.lexer.lineno))
         sys.exit()
 
+# Adds the result of the function to the stack and creates its quadruple
+def p_arf_action(p):
+    '''arf_action : '''
+    function_called = p[-6]
+    function = my_program.function_directory.get_function(function_called)
+    function_return = function['return_address']
+
+    my_program.temporal_variable_counter += 1
+    temporal_variable = "t" + str(my_program.temporal_variable_counter)
+
+    quadruple = Quadruple(my_program.quadruple_number, '=', function_return, None,
+        temporal_variable)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+    my_program.operand_stack.append(temporal_variable)
+
 def p_predefined_function_call(p):
     '''predefined_function_call : CREATE_TURTLE LPAREN RPAREN SEMICOLON
                                 | RESET LPAREN RPAREN SEMICOLON
@@ -570,8 +596,9 @@ def p_srf_action(p):
     # Gets the return operand and the function been called
     operand = my_program.operand_stack.pop()
     operand_type = my_program.type_stack.pop()
-    function_type = my_program.function_directory.get_function_type(
-        my_program.current_scope)
+    function = my_program.function_directory.get_function(my_program.current_scope)
+    function_type = function['return_type']
+    function_return_address = function['return_address']
 
     # Checks if the types match
     if function_type != operand_type:
@@ -579,14 +606,29 @@ def p_srf_action(p):
             my_program.current_scope))
         sys.exit()
 
-    # Creates the returns quadruples and pushes them in a stack to be filled later
-    quadruple = Quadruple(my_program.quadruple_number, 'RETURN', operand, None, None)
+    # Creates the returns quadruples and sets the adress they will return
+    quadruple = Quadruple(my_program.quadruple_number, 'RETURN', operand, None,
+        function_return_address)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+    # Creates the GOTO quadruple and stores them in a stack for multiple returns
+    quadruple = Quadruple(my_program.quadruple_number, 'GOTO', None, None, None)
     my_program.return_list.append(my_program.quadruple_number)
     my_program.quadruple_list.append(quadruple)
     my_program.quadruple_number += 1
 
+
 def p_write(p):
-    '''write : PRINT LPAREN super_expression RPAREN SEMICOLON'''
+    '''write : PRINT LPAREN super_expression cwr_action RPAREN SEMICOLON'''
+
+def p_cwr_action(p):
+    '''cwr_action : '''
+    operand = my_program.operand_stack.pop()
+
+    quadruple = Quadruple(my_program.quadruple_number, 'PRINT', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
 
 def p_empty(p):
     '''empty : '''

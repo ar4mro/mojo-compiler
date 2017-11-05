@@ -16,6 +16,7 @@ class FunctionDirectory():
         self.function_list[function_name] = {
             'name' : function_name,
             'return_type' : function_type,
+            'return_address' : -1,
             'quadruple_number' : -1,
             'parameters' : {
                 'types' : function_parameter_list,
@@ -111,6 +112,14 @@ class FunctionDirectory():
             function['quadruple_number'] = quadruple_number
         else:
             print("The function you are trying to set the quadruple doesn't exists")
+
+    def set_function_address(self, function_name, address_number):
+        """Sets the address return of the function"""
+        function = self.get_function(function_name)
+        if function is not None:
+            function['return_address'] = address_number
+        else:
+            print("The function you are trying to add the adress doesn't exists")
 
     def get_function_quadruple_number(self, function_name,):
         """Retrieves the quadruple number of a function"""

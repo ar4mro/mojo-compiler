@@ -20,6 +20,7 @@ class Program():
         self.quadruple_list = []
         self.jump_list = []
         self.return_list = []
+        self.function_address_helper = 101
         self.temporal_variable_counter = 0
         self.quadruple_number = 1
         self.relational_operations = ['>', '<', '>=', '<=', '==', '!=']
