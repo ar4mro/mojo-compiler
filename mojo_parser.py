@@ -556,6 +556,7 @@ def p_arf_action(p):
     function_called = p[-8]
     function = my_program.function_directory.get_function(function_called)
     function_return = function['return_address']
+    function_type = function['return_type']
 
     my_program.temporal_variable_counter += 1
     temporal_variable = "t" + str(my_program.temporal_variable_counter)
@@ -568,6 +569,7 @@ def p_arf_action(p):
     my_program.quadruple_number += 1
 
     my_program.operand_stack.append(temporal_variable)
+    my_program.type_stack.append(function_type)
 
 def p_predefined_function_call(p):
     '''predefined_function_call : CREATE_TURTLE LPAREN RPAREN SEMICOLON

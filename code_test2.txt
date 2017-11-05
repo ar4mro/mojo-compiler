@@ -2,7 +2,6 @@ program my_program;
 
 var i, j : int;
 
-
 def void uno (int a) {
 	var i : int;
 	i = a * 2;
