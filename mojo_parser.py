@@ -428,10 +428,10 @@ def p_pbo_action(p):
     '''pbo_action : '''
     if p[-1] == "true":
         my_program.operand_stack.append(True)
-        my_program.type_stack.append('boolean')
+        my_program.type_stack.append('bool')
     else:
         my_program.operand_stack.append(False)
-        my_program.type_stack.append('boolean')
+        my_program.type_stack.append('bool')
 
 def p_boolean_value(p):
     '''boolean_value : TRUE

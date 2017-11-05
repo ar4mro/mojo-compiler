@@ -1,9 +1,11 @@
 program my_program;
 
 var i, j : int;
+var b : bool;
 
 def void uno (int a) {
 	var i : int;
+	b = false;
 	i = a * 2;
 	if (i < a + 4) {
 		uno(a + 1);

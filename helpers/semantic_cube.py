@@ -255,5 +255,5 @@ class SemanticCube():
             }
         }
 
-    def get_semantic_type(self, left_tpye, right_type, operator):
-        return self.cube[left_tpye][right_type][operator]
+    def get_semantic_type(self, left_type, right_type, operator):
+        return self.cube[left_type][right_type][operator]
