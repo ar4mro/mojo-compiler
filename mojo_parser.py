@@ -467,15 +467,15 @@ def p_swl_action(p):
     conditional_quadruple.fill_quadruple_jump(my_program.quadruple_number)
 
 def p_procedure_call(p):
-    '''procedure_call : ID LPAREN cra_action arguments RPAREN sfc_action vtc_action SEMICOLON'''
+    '''procedure_call : ID LPAREN abm_action cra_action arguments RPAREN rbm_action sfc_action vtc_action SEMICOLON'''
 
 def p_function_call(p):
-    '''function_call : ID LPAREN cra_action arguments RPAREN sfc_action arf_action'''
+    '''function_call : ID LPAREN abm_action cra_action arguments RPAREN rbm_action sfc_action arf_action'''
 
 # Verifies if the procedure call is void type
 def p_vtc_action(p):
     '''vtc_action : '''
-    function = p[-6]
+    function = p[-8]
     function_type = my_program.function_directory.get_function_type(function)
 
     if function_type != 'void':
@@ -486,7 +486,7 @@ def p_vtc_action(p):
 # ERA action
 def p_cra_action(p):
     '''cra_action : '''
-    function = p[-2]
+    function = p[-3]
     # Checks if the function exists
     if my_program.function_directory.has_function(function):
         # Creates its quadruple action
@@ -538,7 +538,7 @@ def p_sfc_action(p):
     # If there are more parameters than arguments
     if not my_program.temporal_arguments_types:
         # Retrieves the function and is quadruple number
-        function = p[-5]
+        function = p[-7]
         function_quadruple_number = my_program.function_directory.get_function_quadruple_number(function)
 
         # Creates its call quadruple
@@ -553,13 +553,15 @@ def p_sfc_action(p):
 # Adds the result of the function to the stack and creates its quadruple
 def p_arf_action(p):
     '''arf_action : '''
-    function_called = p[-6]
+    function_called = p[-8]
     function = my_program.function_directory.get_function(function_called)
     function_return = function['return_address']
 
     my_program.temporal_variable_counter += 1
     temporal_variable = "t" + str(my_program.temporal_variable_counter)
 
+    # Assignates the result to a new temporal variable and adds it to the
+    # operand stack
     quadruple = Quadruple(my_program.quadruple_number, '=', function_return, None,
         temporal_variable)
     my_program.quadruple_list.append(quadruple)

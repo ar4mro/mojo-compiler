@@ -14,7 +14,7 @@ def void uno (int a) {
 
 def int dos(int b) {
 	b = b * i + j;
-	if (b > 0) {
+	if (b > 0 and b < 10) {
 		return (b * 2);
 	}
 
