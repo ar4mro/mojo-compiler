@@ -1,5 +1,6 @@
 from .function_directory import FunctionDirectory
 from .semantic_cube import SemanticCube
+from .memory import Memory
 
 class Program():
     """A class that represents the program"""
@@ -10,6 +11,7 @@ class Program():
         self.current_scope = current_scope
         self.function_directory = FunctionDirectory()
         self.semantic_cube = SemanticCube()
+        self.memory = Memory()
         self.temporal_variables = []
         self.temporal_parameters_names = []
         self.temporal_parameters_types = []
