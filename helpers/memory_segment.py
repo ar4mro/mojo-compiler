@@ -1,4 +1,5 @@
 from .type_segment import TypeSegment
+import sys
 
 class MemorySegment():
     """Represents a memory that is divided in type segments"""
@@ -29,6 +30,59 @@ class MemorySegment():
             self.string_final_address)
         self.bool_segment = TypeSegment('Boolean', self.bool_initial_address,
             self.bool_final_address)
+
+    def request_address(self, value, value_type):
+        """Requests an address according of the type"""
+        if segment_type == 'int':
+            return self.int_segment.request_address(value)
+        elif segment_type == 'float':
+            return self.float_segment.request_address(value)
+        elif segment_type == 'string':
+            return self.string_segment.request_address(value)
+        elif segment_type == 'bool':
+            return self.bool_segment.request_address(value)
+
+    def determines_segment_tpye(self, address):
+        """Returns the type of the segment according of the address"""
+        if (address >= self.int_initial_address and address <=
+            self.int_final_address):
+            return 'int'
+        elif (address >= self.float_initial_address and address <=
+            self.float_final_address):
+            return 'float'
+        elif (address >= self.string_initial_address and address <=
+            self.string_final_address):
+            return 'string'
+        elif (address >= self.bool_initial_address and address <=
+            self.bool_final_address):
+            return 'bool'
+        else:
+            print("Invalid address in the " + self.name + " memory")
+            sys.exit()
+
+    def get_value(self, address):
+        """Returns a value according of the address"""
+        segment_type = determines_segment_tpye(address)
+        if segment_type == 'int':
+            self.int_segment.get_value(address)
+        elif segment_type == 'float':
+            self.float_segment.get_value(address)
+        elif segment_type == 'string':
+            self.string_segment.get_value(address)
+        elif semantics == 'bool':
+            self.bool_segment.get_value(address)
+
+    def edit_value(self, address):
+        """Edits the value related to an address"""
+        segment_type = determines_segment_tpye(address)
+        if segment_type == 'int':
+            self.int_segment.edit_value(address)
+        elif segment_type == 'float':
+            self.float_segment.edit_value(address)
+        elif segment_type == 'string':
+            self.string_segment.edit_value(address)
+        elif semantics =='bool':
+            self.bool_segment.edit_value(address)
 
     def print_segment(self, segment_type = ""):
         """Prints the segments with all its atributes"""

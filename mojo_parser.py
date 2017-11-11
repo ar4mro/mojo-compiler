@@ -706,7 +706,7 @@ def make_parser():
     #print(str(my_program.temporal_parameters_types))
     #my_program.print_stacks()
     #my_program.print_quadruples()
-    my_program.memory.print_memory('Global')
+    my_program.memory.print_memory('global', 'int')
 
     return parser
 
