@@ -8,26 +8,34 @@ class Memory():
     def __init__(self):
         """Class constructor"""
         self.global_memory = MemorySegment('Global', 5000, 2000)
-        self.temporal_memory = MemorySegment('Temporal', 43000, 2000)
+        self.local_memory = MemorySegment('Local', 9000, 2000)
         self.constant_memory = MemorySegment('Constant', 20000, 2000)
+        self.temporal_memory = MemorySegment('Temporal', 43000, 2000)
 
-    def request_global_address(self, value, value_type):
+    def request_global_address(self, value_type, value="",):
         """Request an address for a global variable"""
-        self.global_memory.request_address(value, value_type)
+        return self.global_memory.request_address(value_type, value)
 
-    def request_temporal_address(self, value, value_type):
-        """Request an address for a temporal variable"""
-        self.temporal_memory.request_address(value, value_type)
+    def request_local_address(self, value_type, value="",):
+        """Request an address for a local variable"""
+        return self.local_memory.request_address(value_type, value)
 
-    def request_constant_address(self, value, value_type):
+    def request_constant_address(self, value_type, value=""):
         """Request an address for a constant"""
-        self.constant_memory.request_address(value, value_type)
+        return self.constant_memory.request_address(value_type, value)
 
-    def determines_memory_tpye(self, address):
+    def request_temporal_address(self, value_type, value=""):
+        """Request an address for a temporal variable"""
+        return self.temporal_memory.request_address(value_type, value)
+
+    def determines_memory_type(self, address):
         """Returns the type of the memory according of the address"""
         if (address >= self.global_memory.initial_address and address <=
             self.global_memory.final_address):
             return 'global'
+        elif (address >= self.local_memory.initial_address and address <=
+            self.local_memory.final_address):
+            return 'local'
         elif (address >= self.temporal_memory.initial_address and address <=
             self.temporal_memory.final_address):
             return 'temporal'
@@ -40,28 +48,40 @@ class Memory():
 
     def get_value(self, address):
         """Returns a value according of the address"""
-        memory_type = determines_memory_tpye(address)
+        memory_type = determines_memory_type(address)
         if memory_type == 'global':
-            self.global_memory.get_value(address)
+            return self.global_memory.get_value(address)
+        elif memory_type == 'local':
+            return self.local_memory.get_value(address)
         elif memory_type == 'temporal':
-            self.temporal_memory.get_value(address)
+            return self.temporal_memory.get_value(address)
         elif memory_type == 'constant':
-            self.constant_memory.get_value(address)
+            return self.constant_memory.get_value(address)
 
-    def edit_value(self, address):
+    def edit_value(self, address, value):
         """Edits the value related to an address"""
-        memory_type = determines_memory_tpye(address)
+        memory_type = determines_memory_type(address, value)
         if memory_type == 'global':
-            self.global_memory.edit_value(address)
+            self.global_memory.edit_value(address, value)
+        elif memory_type == 'local':
+            self.local_memory.edit_value(address, value)
         elif memory_type == 'temporal':
-            self.temporal_memory.edit_value(address)
+            self.temporal_memory.edit_value(address, value)
         elif memory_type == 'constant':
-            self.constant_memory.edit_value(address)
+            self.constant_memory.edit_value(address, value)
+
+    def reset_temporal_memory(self):
+        """Resets the temporal and local memory, clears all the addresses used"""
+        self.local_memory.reset_memory()
+        self.temporal_memory.reset_memory()
+
 
     def print_memory(self, memory_type, segment_type = ""):
         """Prints the memory"""
         if memory_type == 'global':
             self.global_memory.print_segment(segment_type)
+        elif memory_type == 'local':
+            self.local_memory.print_segment(segment_type)
         elif memory_type == 'temporal':
             self.temporal_memory.print_segment(segment_type)
         elif memory_type == 'constant':

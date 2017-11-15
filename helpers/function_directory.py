@@ -21,7 +21,6 @@ class FunctionDirectory():
             'parameters' : {
                 'types' : function_parameter_list,
                 'addresses' : function_parameter_adresses,
-
             },
             'variables': VariableTable(),
             'number_of_local_variables' : {
@@ -50,16 +49,17 @@ class FunctionDirectory():
             print("A function with this name doesn't exist")
             return None
 
-    def add_parameter_to_function(self, function_name, parameter_list):
+    def add_parameter_to_function(self, function_name, type_list, addresses_list):
         """Adds a parameter to its function"""
         function = self.get_function(function_name)
         if function is not None:
-            function['parameters']['types'] = parameter_list
+            function['parameters']['types'] = type_list
+            function['parameters']['addresses'] = addresses_list
         else:
             print("The function you are trying to add the paremeter doesnt exist")
 
     def add_variable_to_function(self, function_name, variable_type,
-            variable_name):
+            variable_name, variable_adress=0):
         """Adds a variable to its function variable table"""
         function = self.get_function(function_name)
         if function is not None:
@@ -68,10 +68,10 @@ class FunctionDirectory():
             else:
                 # Adds the varaible to the variable table and increments the
                 # number of local variables the function will use
-                function['variables'].add_variable(variable_type, variable_name)
+                function['variables'].add_variable(variable_type, variable_name, variable_adress)
                 function['number_of_local_variables'][variable_type] += 1
         else:
-            print("The function you are trying to add the variable doesnt exist")
+            print("The function you are trying to add the variable doesnt exists")
 
     def get_function_variable(self, function_name, variable_name):
         """Looks for a variable in the function"""""
@@ -132,7 +132,7 @@ class FunctionDirectory():
     def print_directory(self):
         """Prints the list of functions and its properties"""
         for function, properties in self.function_list.items():
-            print("function : " + function)
+            print("function : " + str(function))
 
             # Prints the variable table only if the value is an instance of
             # the class

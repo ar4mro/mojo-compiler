@@ -1,31 +1,24 @@
-program my_program;
+program patito;
 
 var i, j : int;
-var b : bool;
 
-def void uno (int a) {
+def void uno (int a, int b) {
 	var i : int;
-	b = false;
 	i = a * 2;
 	if (i < a + 4) {
-		uno(a + 1);
+		uno(a + 1, 3);
 	}
 	print(i);
 }
 
 def int dos(int b) {
 	b = b * i + j;
-	if (b > 0 and b < 10) {
-		return (b * 2);
-	}
-
-	i = j - 6 * 3;
-	return b;
+	return (b * 2);
 }
 
 main {
 	i = 2;
 	j = i * 2 - 1;
-	uno(j);
+	uno(j, i);
 	print(i + dos(i + j));
 }

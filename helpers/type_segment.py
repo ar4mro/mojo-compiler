@@ -34,7 +34,7 @@ class TypeSegment():
         else:
             return False
 
-    def request_address(self, value):
+    def request_address(self, value=""):
         """Allocates an address for a variable or constant"""
         if self.available_space():
             address = self.current_address
@@ -53,7 +53,7 @@ class TypeSegment():
             print("The address you requested a value is not valid")
             return None
 
-    def edit_value(sefl, address, value):
+    def edit_value(self, address, value):
         """Edits the value related to an address"""
         if self.valid_address(address):
             self.segment[address] = value
@@ -61,3 +61,8 @@ class TypeSegment():
             print("The address: " + str(address) + " you are trying to change" +
                 " its value is not valid")
             sys.exit()
+
+    def reset(self):
+        """Clears all the addresses, starts at its initial adress"""
+        self.segment.clear()
+        self.current_address = self.initial_address

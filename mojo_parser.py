@@ -36,6 +36,7 @@
 # srf_action -> Sets on the return flag and creates its quadruples
 # vtc_action -> Verifies the type of the procedure call
 # arf_action -> Adds the result of the function to the stack
+# cmq_action -> Creates the main quadruple GoTo action
 
 import sys
 import ply.yacc as yacc
@@ -48,14 +49,21 @@ my_program = Program()
 
 # Parsing rules
 def p_program(p):
-    '''program : PROGRAM ID cfd_action SEMICOLON vars functions MAIN amf_action block'''
+    '''program : PROGRAM ID cmq_action cfd_action SEMICOLON vars functions MAIN amf_action block'''
     print('Syntax correct')
+
+# Creates the main quadruple GoTo action
+def p_cmq_action(p):
+    '''cmq_action : '''
+    quadruple = Quadruple(my_program.quadruple_number, 'GOTO', 'MAIN', None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
 
 # Creates the function directory
 def p_cfd_action(p):
     '''cfd_action : '''
-    my_program.global_scope = p[-1]
-    my_program.current_scope = p[-1]
+    my_program.global_scope = p[-2]
+    my_program.current_scope = p[-2]
 
     # Adds the program, the global scope, to the directory
     my_program.function_directory.add_function(my_program.global_scope, 'void')
@@ -83,11 +91,18 @@ def p_adv_action(p):
     variable_type = p[-1]
     variable_name = p[-5]
     my_program.temporal_variables.append(variable_name)
+    my_program.temporal_variables.reverse()
 
     # Adds all the variables declared in the line to the function
     for variable in my_program.temporal_variables:
+        # Request the addresses depending of the scope
+        if my_program.current_scope == my_program.global_scope:
+            variable_address = my_program.memory.request_global_address(variable_type)
+        else:
+            variable_address = my_program.memory.request_local_address(variable_type)
+
         my_program.function_directory.add_variable_to_function(
-                my_program.current_scope, variable_type, variable)
+                my_program.current_scope, variable_type, variable, variable_address)
 
     # Clears the list of temporal variables to start a new line of declarations
     del my_program.temporal_variables[:]
@@ -134,6 +149,7 @@ def p_adf_action(p):
     # Determines the name of the function and its type
     my_program.current_scope = p[-4]
     function_type = p[-5]
+    parameter_adresses_list = []
 
     # Adds the function to the directory
     my_program.function_directory.add_function(my_program.current_scope, function_type)
@@ -149,17 +165,19 @@ def p_adf_action(p):
 
         my_program.function_address_helper += 1
 
-    # Adds the parameters signature to the function
-    my_program.function_directory.add_parameter_to_function(my_program.current_scope,
-            list(my_program.temporal_parameters_types))
-
     # Adds the parameters to the function variable table
     parameters = zip(my_program.temporal_parameters_names,
         my_program.temporal_parameters_types)
 
     for parameter_name, parameter_type in parameters:
+        parameter_adress = my_program.memory.request_local_address(parameter_type)
+        parameter_adresses_list.append(parameter_adress)
         my_program.function_directory.add_variable_to_function(
-                my_program.current_scope, parameter_type, parameter_name)
+                my_program.current_scope, parameter_type, parameter_name, parameter_adress)
+
+    # Adds the parameters signature to the function
+    my_program.function_directory.add_parameter_to_function(my_program.current_scope,
+            list(my_program.temporal_parameters_types), list(parameter_adresses_list))
 
     # Clears the temporal parameters
     del my_program.temporal_parameters_names[:]
@@ -194,6 +212,9 @@ def p_enp_action(p):
     my_program.quadruple_number += 1
     my_program.return_flag = False
 
+    # Reset the temporal memory
+    my_program.memory.reset_temporal_memory()
+
 # Adds the main function to function directory
 def p_amf_action(p):
     '''amf_action : '''
@@ -201,6 +222,10 @@ def p_amf_action(p):
     my_program.function_directory.add_function(my_program.current_scope, 'void')
     my_program.function_directory.set_function_quadruple_number(my_program.current_scope,
         my_program.quadruple_number)
+
+    # Fills the quadruple jump number of the program to the main function
+    quadruple = my_program.quadruple_list[0]
+    quadruple.fill_quadruple_jump(my_program.quadruple_number)
 
 def p_block(p):
     '''block : LBRACE vars statements RBRACE'''
@@ -559,7 +584,7 @@ def p_arf_action(p):
     function_type = function['return_type']
 
     my_program.temporal_variable_counter += 1
-    temporal_variable = "t" + str(my_program.temporal_variable_counter)
+    temporal_variable = my_program.memory.request_temporal_address(function_type)
 
     # Assignates the result to a new temporal variable and adds it to the
     # operand stack
@@ -658,7 +683,8 @@ def solve_operation(p):
 
     if result_type != 'error':
         my_program.temporal_variable_counter += 1
-        temporal_variable = "t" + str(my_program.temporal_variable_counter)
+        #temporal_variable = "t" + str(my_program.temporal_variable_counter)
+        temporal_variable = my_program.memory.request_temporal_address(result_type)
 
         # Creates the quadruple
         quadruple = Quadruple(my_program.quadruple_number, operator, left_operand,
@@ -702,11 +728,11 @@ def make_parser():
         code = file_object.read()
         parser.parse(code)
 
-    #my_program.function_directory.print_directory()
+    my_program.function_directory.print_directory()
     #print(str(my_program.temporal_parameters_types))
     #my_program.print_stacks()
     #my_program.print_quadruples()
-    my_program.memory.print_memory('global', 'int')
+    #my_program.memory.print_memory('local')
 
     return parser
 

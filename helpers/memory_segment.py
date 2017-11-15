@@ -31,7 +31,7 @@ class MemorySegment():
         self.bool_segment = TypeSegment('Boolean', self.bool_initial_address,
             self.bool_final_address)
 
-    def request_address(self, value, value_type):
+    def request_address(self, segment_type, value=""):
         """Requests an address according of the type"""
         if segment_type == 'int':
             return self.int_segment.request_address(value)
@@ -64,25 +64,25 @@ class MemorySegment():
         """Returns a value according of the address"""
         segment_type = determines_segment_tpye(address)
         if segment_type == 'int':
-            self.int_segment.get_value(address)
+            return self.int_segment.get_value(address)
         elif segment_type == 'float':
-            self.float_segment.get_value(address)
+            return self.float_segment.get_value(address)
         elif segment_type == 'string':
-            self.string_segment.get_value(address)
+            return self.string_segment.get_value(address)
         elif semantics == 'bool':
-            self.bool_segment.get_value(address)
+            return self.bool_segment.get_value(address)
 
-    def edit_value(self, address):
+    def edit_value(self, address, value):
         """Edits the value related to an address"""
         segment_type = determines_segment_tpye(address)
         if segment_type == 'int':
-            self.int_segment.edit_value(address)
+            self.int_segment.edit_value(address, value)
         elif segment_type == 'float':
-            self.float_segment.edit_value(address)
+            self.float_segment.edit_value(address, value)
         elif segment_type == 'string':
-            self.string_segment.edit_value(address)
+            self.string_segment.edit_value(address, value)
         elif semantics =='bool':
-            self.bool_segment.edit_value(address)
+            self.bool_segment.edit_value(address, value)
 
     def print_segment(self, segment_type = ""):
         """Prints the segments with all its atributes"""
@@ -103,3 +103,10 @@ class MemorySegment():
             print(self.float_segment)
             print(self.string_segment)
             print(self.bool_segment)
+
+    def reset_memory(self):
+        """Resets the segment, clears all the addresses used"""
+        self.int_segment.reset()
+        self.float_segment.reset()
+        self.bool_segment.reset()
+        self.string_segment.reset()
