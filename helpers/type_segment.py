@@ -1,5 +1,5 @@
 import json # Used to give format at printing dictionaries
-import sys
+import sys # Prints segment in a dictionary format, booleans are min caps
 
 class TypeSegment():
     """Represents a segment of the memory for a primitive type"""
@@ -34,7 +34,7 @@ class TypeSegment():
         else:
             return False
 
-    def request_address(self, value=""):
+    def request_address(self, value):
         """Allocates an address for a variable or constant"""
         if self.available_space():
             address = self.current_address
@@ -52,6 +52,15 @@ class TypeSegment():
         else:
             print("The address you requested a value is not valid")
             return None
+
+    def check_existing_value(self, existing_value):
+        """Checks if the value exists in the segment"""
+        for address, value in self.segment.items():
+            # Constant values are unique, there's only one address per value
+            if value == existing_value:
+                return address
+        # Returns nothing if the value doesn't exists
+        return None
 
     def edit_value(self, address, value):
         """Edits the value related to an address"""

@@ -31,15 +31,23 @@ class MemorySegment():
         self.bool_segment = TypeSegment('Boolean', self.bool_initial_address,
             self.bool_final_address)
 
-    def request_address(self, segment_type, value=""):
+    def request_address(self, segment_type, value=None):
         """Requests an address according of the type"""
         if segment_type == 'int':
+            if value is None:
+                value = 0
             return self.int_segment.request_address(value)
         elif segment_type == 'float':
+            if value is None:
+                value = 0.0
             return self.float_segment.request_address(value)
         elif segment_type == 'string':
+            if value is None:
+                value = ""
             return self.string_segment.request_address(value)
         elif segment_type == 'bool':
+            if value is None:
+                value = False
             return self.bool_segment.request_address(value)
 
     def determines_segment_tpye(self, address):
@@ -62,14 +70,14 @@ class MemorySegment():
 
     def get_value(self, address):
         """Returns a value according of the address"""
-        segment_type = determines_segment_tpye(address)
+        segment_type = self.determines_segment_tpye(address)
         if segment_type == 'int':
             return self.int_segment.get_value(address)
         elif segment_type == 'float':
             return self.float_segment.get_value(address)
         elif segment_type == 'string':
             return self.string_segment.get_value(address)
-        elif semantics == 'bool':
+        elif segment_type == 'bool':
             return self.bool_segment.get_value(address)
 
     def edit_value(self, address, value):
@@ -81,15 +89,32 @@ class MemorySegment():
             self.float_segment.edit_value(address, value)
         elif segment_type == 'string':
             self.string_segment.edit_value(address, value)
-        elif semantics =='bool':
+        elif segment_type =='bool':
             self.bool_segment.edit_value(address, value)
+
+    def check_existing_value(self, segment_type, value):
+        """Checks if the value exists in the segment"""
+        if segment_type == 'int':
+            return self.int_segment.check_existing_value(value)
+        elif segment_type == 'float':
+            return self.float_segment.check_existing_value(value)
+        elif segment_type == 'string':
+            return self.string_segment.check_existing_value(value)
+        elif segment_type =='bool':
+            return self.bool_segment.check_existing_value(value)
+
+    def reset_memory(self):
+        """Resets the segment, clears all the addresses used"""
+        self.int_segment.reset()
+        self.float_segment.reset()
+        self.bool_segment.reset()
+        self.string_segment.reset()
 
     def print_segment(self, segment_type = ""):
         """Prints the segments with all its atributes"""
         print("Memory : " + self.name + "\n" +
               "   Initial address : " + str(self.initial_address) + "\n" +
               "   Final address : " + str(self.final_address))
-
         if segment_type == 'int':
             print(self.int_segment)
         elif segment_type == 'float':
@@ -103,10 +128,3 @@ class MemorySegment():
             print(self.float_segment)
             print(self.string_segment)
             print(self.bool_segment)
-
-    def reset_memory(self):
-        """Resets the segment, clears all the addresses used"""
-        self.int_segment.reset()
-        self.float_segment.reset()
-        self.bool_segment.reset()
-        self.string_segment.reset()

@@ -12,19 +12,19 @@ class Memory():
         self.constant_memory = MemorySegment('Constant', 20000, 2000)
         self.temporal_memory = MemorySegment('Temporal', 43000, 2000)
 
-    def request_global_address(self, value_type, value="",):
+    def request_global_address(self, value_type, value=None,):
         """Request an address for a global variable"""
         return self.global_memory.request_address(value_type, value)
 
-    def request_local_address(self, value_type, value="",):
+    def request_local_address(self, value_type, value=None,):
         """Request an address for a local variable"""
         return self.local_memory.request_address(value_type, value)
 
-    def request_constant_address(self, value_type, value=""):
+    def request_constant_address(self, value_type, value=None):
         """Request an address for a constant"""
         return self.constant_memory.request_address(value_type, value)
 
-    def request_temporal_address(self, value_type, value=""):
+    def request_temporal_address(self, value_type, value=None):
         """Request an address for a temporal variable"""
         return self.temporal_memory.request_address(value_type, value)
 
@@ -48,7 +48,7 @@ class Memory():
 
     def get_value(self, address):
         """Returns a value according of the address"""
-        memory_type = determines_memory_type(address)
+        memory_type = self.determines_memory_type(address)
         if memory_type == 'global':
             return self.global_memory.get_value(address)
         elif memory_type == 'local':
@@ -70,11 +70,14 @@ class Memory():
         elif memory_type == 'constant':
             self.constant_memory.edit_value(address, value)
 
+    def check_existing_constant_value(self, value_type, value):
+        """Checks if the value exists in the constant memory"""
+        return self.constant_memory.check_existing_value(value_type, value)
+
     def reset_temporal_memory(self):
         """Resets the temporal and local memory, clears all the addresses used"""
         self.local_memory.reset_memory()
         self.temporal_memory.reset_memory()
-
 
     def print_memory(self, memory_type, segment_type = ""):
         """Prints the memory"""

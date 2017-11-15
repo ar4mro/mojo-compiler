@@ -21,12 +21,12 @@ reserved = {
     'or' : 'OR',
     'not' : 'NOT',
     'print' : 'PRINT',
-    'true' : 'TRUE',
-    'false' : 'FALSE',
     'def' : 'DEF',
     'while' : 'WHILE',
     'main' : 'MAIN',
     'return' : 'RETURN',
+    'True' : 'TRUE',
+    'False' : 'FALSE',
 
     # Predefined functions
     'create_turtle' : 'CREATE_TURTLE',

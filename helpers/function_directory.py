@@ -73,6 +73,14 @@ class FunctionDirectory():
         else:
             print("The function you are trying to add the variable doesnt exists")
 
+    def add_temporal_to_function(self, function_name, temporal_type):
+        """Increments the number of temporals the function has"""
+        function = self.get_function(function_name)
+        if function is not None:
+            function['number_of_temporal_variables'][temporal_type] += 1
+        else:
+            print("The function you are trying to add the temporal doesnt exists")
+
     def get_function_variable(self, function_name, variable_name):
         """Looks for a variable in the function"""""
         function = self.get_function(function_name)

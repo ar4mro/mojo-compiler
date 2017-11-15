@@ -160,10 +160,9 @@ def p_adf_action(p):
 
     if function_type != 'void':
         # Sets the address return of the function
+        function_address = my_program.memory.request_global_address(function_type)
         my_program.function_directory.set_function_address(my_program.current_scope,
-            my_program.function_address_helper)
-
-        my_program.function_address_helper += 1
+            function_address)
 
     # Adds the parameters to the function variable table
     parameters = zip(my_program.temporal_parameters_names,
@@ -279,8 +278,6 @@ def p_soa_action(p):
             print('Operation type mismatch at {0}'.format(p.lexer.lineno))
             sys.exit()
 
-
-
 def p_condition(p):
     '''condition : IF LPAREN super_expression RPAREN cif_action block else sif_action'''
 
@@ -312,7 +309,7 @@ def p_cel_action(p):
     # after GoTo was created
     quadruple.fill_quadruple_jump(my_program.quadruple_number)
 
-#
+# Fills the pending GoToF quadruples
 def p_sif_action(p):
     '''sif_action : '''
     # Gets the number of the GotoF quadruple to be filled
@@ -423,39 +420,64 @@ def p_pid_action(p):
             sys.exit()
         else:
             # Adds the variale to the operand stack
-            my_program.operand_stack.append(variable['name'])
+            my_program.operand_stack.append(variable['memory_adress'])
             my_program.type_stack.append(variable['type'])
     else:
         # Adds the variale to the operand stack
-        my_program.operand_stack.append(variable['name'])
+        my_program.operand_stack.append(variable['memory_adress'])
         my_program.type_stack.append(variable['type'])
 
 # Push an intenger to the operand stack
 def p_pio_action(p):
     '''pio_action : '''
-    my_program.operand_stack.append(int(p[-1]))
+    # Gets the constant address, creates one if doesn't exists
+    constant_address = my_program.memory.check_existing_constant_value('int', int(p[-1]))
+    if constant_address is None:
+        constant_address = my_program.memory.request_constant_address('int', int(p[-1]))
+
+    my_program.operand_stack.append(constant_address)
     my_program.type_stack.append('int')
 
 # Push a float to the operand stack
 def p_pfo_action(p):
     '''pfo_action : '''
-    my_program.operand_stack.append(float(p[-1]))
+    # Gets the constant address, creates one if doesn't exists
+    constant_address = my_program.memory.check_existing_constant_value('float', float(p[-1]))
+    if constant_address is None:
+        constant_address = my_program.memory.request_constant_address('float', float(p[-1]))
+
+    my_program.operand_stack.append(constant_address)
     my_program.type_stack.append('float')
 
 # Push a string to the operand stack
 def p_pso_action(p):
     '''pso_action : '''
-    my_program.operand_stack.append(str(p[-1]))
+    # Gets the constant address, creates one if doesn't exists
+    constant_address = my_program.memory.check_existing_constant_value('string', str(p[-1]))
+    if constant_address is None:
+        constant_address = my_program.memory.request_constant_address('string', str(p[-1]))
+
+    my_program.operand_stack.append(constant_address)
     my_program.type_stack.append('string')
 
 # Push a boolean to the operand stack
 def p_pbo_action(p):
     '''pbo_action : '''
-    if p[-1] == "true":
-        my_program.operand_stack.append(True)
+    if p[-1] == "True":
+        # Gets the constant address, creates one if doesn't exists
+        constant_address = my_program.memory.check_existing_constant_value('bool', True)
+        if constant_address is None:
+            constant_address = my_program.memory.request_constant_address('bool', True)
+
+        my_program.operand_stack.append(constant_address)
         my_program.type_stack.append('bool')
     else:
-        my_program.operand_stack.append(False)
+        # Gets the constant address, creates one if doesn't exists
+        constant_address = my_program.memory.check_existing_constant_value('bool', False)
+        if constant_address is None:
+            constant_address = my_program.memory.request_constant_address('bool', False)
+
+        my_program.operand_stack.append(constant_address)
         my_program.type_stack.append('bool')
 
 def p_boolean_value(p):
@@ -470,7 +492,7 @@ def p_list_call(p):
 def p_loop(p):
     '''loop : WHILE cwl_action LPAREN super_expression RPAREN cif_action block swl_action'''
 
-# Stores the actual quaduple number
+# Stores the actual quaduple number to be used later for the while
 def p_cwl_action(p):
     '''cwl_action : '''
     my_program.jump_list.append(my_program.quadruple_number)
@@ -583,17 +605,21 @@ def p_arf_action(p):
     function_return = function['return_address']
     function_type = function['return_type']
 
-    my_program.temporal_variable_counter += 1
-    temporal_variable = my_program.memory.request_temporal_address(function_type)
+    #my_program.temporal_variable_counter += 1
+
+    # Requests a temporal variable to store the result of the function
+    temporal_variable_address = my_program.memory.request_temporal_address(function_type)
+    my_program.function_directory.add_temporal_to_function(my_program.current_scope,
+        function_type)
 
     # Assignates the result to a new temporal variable and adds it to the
     # operand stack
     quadruple = Quadruple(my_program.quadruple_number, '=', function_return, None,
-        temporal_variable)
+        temporal_variable_address)
     my_program.quadruple_list.append(quadruple)
     my_program.quadruple_number += 1
 
-    my_program.operand_stack.append(temporal_variable)
+    my_program.operand_stack.append(temporal_variable_address)
     my_program.type_stack.append(function_type)
 
 def p_predefined_function_call(p):
@@ -682,18 +708,22 @@ def solve_operation(p):
         right_type, operator)
 
     if result_type != 'error':
-        my_program.temporal_variable_counter += 1
+        #my_program.temporal_variable_counter += 1
         #temporal_variable = "t" + str(my_program.temporal_variable_counter)
-        temporal_variable = my_program.memory.request_temporal_address(result_type)
+
+        # Gets an address of the temporal memory
+        temporal_variable_address = my_program.memory.request_temporal_address(result_type)
+        my_program.function_directory.add_temporal_to_function(my_program.current_scope,
+            result_type)
 
         # Creates the quadruple
         quadruple = Quadruple(my_program.quadruple_number, operator, left_operand,
-            right_operand , temporal_variable)
+            right_operand , temporal_variable_address)
 
         # Adds the quadruple to its list and the results to the stacks
         my_program.quadruple_list.append(quadruple)
         my_program.quadruple_number += 1
-        my_program.operand_stack.append(temporal_variable)
+        my_program.operand_stack.append(temporal_variable_address)
         my_program.type_stack.append(result_type)
     else:
         print('Operation type mismatch at {0}'.format(p.lexer.lineno))
@@ -728,12 +758,11 @@ def make_parser():
         code = file_object.read()
         parser.parse(code)
 
-    my_program.function_directory.print_directory()
+    #my_program.function_directory.print_directory()
     #print(str(my_program.temporal_parameters_types))
     #my_program.print_stacks()
-    #my_program.print_quadruples()
-    #my_program.memory.print_memory('local')
-
+    my_program.print_quadruples()
+    #my_program.memory.print_memory('global')
     return parser
 
 make_parser()
