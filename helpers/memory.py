@@ -2,8 +2,7 @@ from .memory_segment import MemorySegment
 import sys
 
 class Memory():
-    """Represents a memory in a program for global, temporal and
-    constant values"""
+    """Represents a memory in a program for global, temporal and constant values"""
 
     def __init__(self):
         """Class constructor"""
@@ -27,6 +26,16 @@ class Memory():
     def request_temporal_address(self, value_type, value=None):
         """Request an address for a temporal variable"""
         return self.temporal_memory.request_address(value_type, value)
+
+    def request_sequential_global_addresses(self, value_type, total_addresses, value=None):
+        """Requests a bunch of global addresses"""
+        return self.global_memory.request_sequential_addresses(value_type,
+            total_addresses, value)
+
+    def request_sequential_local_addresses(self, value_type, total_addresses, value=None):
+        """Requests a bunch of local addresses"""
+        return self.global_memory.request_sequential_addresses(value_type,
+            total_addresses, value)
 
     def determines_memory_type(self, address):
         """Returns the type of the memory according of the address"""

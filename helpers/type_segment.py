@@ -20,9 +20,9 @@ class TypeSegment():
                 "   Current address " + str(self.current_address) + "\n" +
                 "   Addresses " + json.dumps(self.segment, indent=4))
 
-    def available_space(self):
+    def available_space(self, total_addresses=0):
         """Determines if the segment is not full"""
-        if self.current_address <= self.final_address:
+        if self.current_address + total_addresses <= self.final_address:
             return True
         else:
             return False
@@ -42,7 +42,22 @@ class TypeSegment():
             self.current_address += 1
             return address
         else:
-            print("There is no available space in the " + self.name + " segment")
+            print("There is no available space in the " + self.name + " memory segment")
+            sys.exit()
+
+    def request_sequential_addresses(self, total_addresses, value):
+        """Allocates a bunch of addresses"""
+        if self.available_space(total_addresses):
+            base_address = self.current_address
+
+            # Request a unique address for each element
+            for i in range(total_addresses):
+                self.segment[self.current_address] = value
+                self.current_address += 1
+
+            return base_address
+        else:
+            print("There is no available space in the " + self.name + " memory segment")
             sys.exit()
 
     def get_value(self, address):

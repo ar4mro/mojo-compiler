@@ -22,7 +22,6 @@ class VirtualMachine():
         for i in range(function_called['function']['number_of_local_variables']['bool']):
             function_called['memory'].request_local_address('bool')
 
-
     def request_temporal_addresses(self, function_called):
         """Request the number of temporal addresses a function has for each type"""
         for i in range(function_called['function']['number_of_temporal_variables']['int']):
@@ -47,6 +46,7 @@ class VirtualMachine():
         # Executes for each quadruple
         while self.number_of_current_instruction < self.number_of_instructions:
             current_instruction = self.instructions[self.number_of_current_instruction]
+            #print(current_instruction)
 
             # Obtains the type of action, the addresses of the operands
             # and where the result will be stored
@@ -199,37 +199,37 @@ class VirtualMachine():
                 # Pass to the next quadruple
                 self.number_of_current_instruction += 1
             elif instruction_action == 'PARAMETER':
-                # Gets the value of the parameter and the address that will
+                # Gets the value of the parameter and the address where will
                 # be stored and increments the position of the parameter called
                 left_operand = current_memory.get_value(left_operand_address)
                 parameter_adress = function_called['function']['parameters']['addresses'][actual_parameter]
                 actual_parameter += 1
 
                 # Stores the value of the parameter in its corresponding function
-                # menory
+                # segment menory
                 function_called['memory'].edit_value(parameter_adress, left_operand)
 
                 # Pass to the next quadruple
                 self.number_of_current_instruction += 1
             elif instruction_action == 'GOSUB':
-                # Stores the number of instruction we will return after a function
+                # Stores the number of instruction we will return after the function
                 # execution ends
                 instruction_number_to_back_list.append(self.number_of_current_instruction)
 
                 # Stores the local and temporal memory segments of the function
-                # that is making a call
+                # that is making the call
                 local_segment_pointer_list.append(current_memory.local_memory)
                 temporal_segment_pointer_list.append(current_memory.temporal_memory)
 
                 # Change the local and temporal memory segments for the ones the
-                # function calling has
+                # function that will be executed has
                 current_memory.local_memory = function_called['memory'].local_memory
                 current_memory.temporal_memory = function_called['memory'].temporal_memory
 
                 # Points where the function called starts
                 self.number_of_current_instruction = result_address - 1
             elif instruction_action == 'ENDPROC':
-                # Destroys the local information of the function when it end 
+                # Destroys the local information of the function when it ends
                 # and returns to the local and temporal segments of the function caller
                 function_called.clear()
                 current_memory.local_memory = local_segment_pointer_list.pop()

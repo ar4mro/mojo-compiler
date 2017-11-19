@@ -768,8 +768,8 @@ def make_parser():
     virtual_machine = VirtualMachine(my_program.memory, my_program.function_directory,
         my_program.quadruple_list)
     #virtual_machine.memory.print_memory('global')
-    virtual_machine.execute()
-    #virtual_machine.memory.print_memory('temporal', 'int')
+    #virtual_machine.execute()
+    #virtual_machine.memory.print_memory('local', 'int')
     #virtual_machine.memory.print_memory('global', 'int')
 
     return parser

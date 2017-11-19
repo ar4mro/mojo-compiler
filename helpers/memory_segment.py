@@ -50,6 +50,25 @@ class MemorySegment():
                 value = False
             return self.bool_segment.request_address(value)
 
+    def request_sequential_addresses(self, segment_type, total_addresses, value=None):
+        """Requests a bunch of addresses according of the type"""
+        if segment_type == 'int':
+            if value is None:
+                value = 0
+            return self.int_segment.request_sequential_addresses(total_addresses, value)
+        elif segment_type == 'float':
+            if value is None:
+                value = 0.0
+            return self.float_segment.request_sequential_addresses(total_addresses, value)
+        elif segment_type == 'string':
+            if value is None:
+                value = ""
+            return self.string_segment.request_sequential_addresses(total_addresses, value)
+        elif segment_type == 'bool':
+            if value is None:
+                value = False
+            return self.bool_segment.request_sequential_addresses(total_addresses, value)
+
     def determines_segment_tpye(self, address):
         """Returns the type of the segment according of the address"""
         if (address >= self.int_initial_address and address <=

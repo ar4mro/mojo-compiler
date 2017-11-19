@@ -21,8 +21,8 @@ def int factorial2(int n) {
 }
 
 main {
-	i = factorial(10);
-	j = factorial2(10);
+	i = factorial(5);
+	j = factorial2(5);
 
 	print("Factorial recursivo:");
 	print(i);
