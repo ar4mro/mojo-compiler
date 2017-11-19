@@ -1,0 +1,31 @@
+program factorials;
+
+var i, j : int;
+
+def int factorial(int n) {
+	if (n == 1 or n == 0) {
+		return 1;
+	} else {
+		return n * factorial(n - 1);
+	}
+}
+
+def int factorial2(int n) {
+	var num : int;
+	num = 1;
+	while (n >= 1) {
+		num = num * n;
+		n = n - 1;
+	}
+	return num;
+}
+
+main {
+	i = factorial(10);
+	j = factorial2(10);
+
+	print("Factorial recursivo:");
+	print(i);
+	print("Factorial loop:");
+	print(j);
+}

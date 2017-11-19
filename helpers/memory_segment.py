@@ -82,7 +82,7 @@ class MemorySegment():
 
     def edit_value(self, address, value):
         """Edits the value related to an address"""
-        segment_type = determines_segment_tpye(address)
+        segment_type = self.determines_segment_tpye(address)
         if segment_type == 'int':
             self.int_segment.edit_value(address, value)
         elif segment_type == 'float':

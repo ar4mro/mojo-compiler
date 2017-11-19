@@ -60,7 +60,7 @@ class Memory():
 
     def edit_value(self, address, value):
         """Edits the value related to an address"""
-        memory_type = determines_memory_type(address, value)
+        memory_type = self.determines_memory_type(address)
         if memory_type == 'global':
             self.global_memory.edit_value(address, value)
         elif memory_type == 'local':
@@ -88,4 +88,9 @@ class Memory():
         elif memory_type == 'temporal':
             self.temporal_memory.print_segment(segment_type)
         elif memory_type == 'constant':
+            self.constant_memory.print_segment(segment_type)
+        else:
+            self.global_memory.print_segment(segment_type)
+            self.local_memory.print_segment(segment_type)
+            self.temporal_memory.print_segment(segment_type)
             self.constant_memory.print_segment(segment_type)

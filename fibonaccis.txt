@@ -1,0 +1,41 @@
+program fibonaccis;
+
+var i, j: int;
+
+def int fibonacci(int n) {
+	if(n == 0) {
+		return 0;
+	} else {
+		if (n == 1) {
+			return 1;
+		} else {
+			return fibonacci(n - 1) + fibonacci(n - 2);
+		}
+	}
+}
+
+def int fibonacci2(int n) {
+	var first, second, i, fibo : int;
+	first = 0;
+	second = 1;
+	i = 0;
+	fibo = 0;
+
+	while (i < n) {
+		fibo = first + second;
+		first = second;
+		second = fibo;
+		i = i + 1;
+	}
+	return first;
+}
+
+main {
+	i = fibonacci(15);
+	j = fibonacci2(15);
+
+	print("Fibonacci recursivo");
+	print(i);
+	print("Fibonacci loop");
+	print(j);
+}

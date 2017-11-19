@@ -44,6 +44,7 @@ import ply.yacc as yacc
 from mojo_lexer import tokens
 from helpers.program import Program
 from helpers.quadruple import Quadruple
+from helpers.virtual_machine import VirtualMachine
 
 my_program = Program()
 
@@ -752,7 +753,7 @@ def make_parser():
 
     #print("Name of the file to be parsed")
     #file_name = input()
-    file_name = 'code_test2.txt'
+    file_name = 'factorials.txt'
 
     with open(file_name) as file_object:
         code = file_object.read()
@@ -761,8 +762,15 @@ def make_parser():
     #my_program.function_directory.print_directory()
     #print(str(my_program.temporal_parameters_types))
     #my_program.print_stacks()
-    my_program.print_quadruples()
+    #my_program.print_quadruples()
     #my_program.memory.print_memory('global')
-    return parser
 
+    virtual_machine = VirtualMachine(my_program.memory, my_program.function_directory,
+        my_program.quadruple_list)
+    #virtual_machine.memory.print_memory('global')
+    virtual_machine.execute()
+    #virtual_machine.memory.print_memory('temporal', 'int')
+    #virtual_machine.memory.print_memory('global', 'int')
+
+    return parser
 make_parser()
