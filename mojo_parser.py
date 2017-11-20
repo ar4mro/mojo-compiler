@@ -8,6 +8,7 @@
 # Embedded actions not part of the syntax
 # cfd_action -> Create function directory
 # adv_action -> Add a variable to the current function
+# ada_action -> Adds a dimensioned variable to the current function
 # adf_action -> Adds a new function to the directory
 # amf_action -> Adds the main function to the directory
 # pio_action -> Push a variable operand to the stack
@@ -36,7 +37,7 @@
 # srf_action -> Sets on the return flag and creates its quadruples
 # vtc_action -> Verifies the type of the procedure call
 # arf_action -> Adds the result of the function to the stack
-# cmq_action -> Creates the main quadruple GoTo action
+# ivd_action -> Identifies the dimensions of a variable when declared
 
 import sys
 import ply.yacc as yacc
@@ -70,18 +71,41 @@ def p_cfd_action(p):
     my_program.function_directory.add_function(my_program.global_scope, 'void')
 
 def p_vars(p):
-    '''vars : VAR ID list_declaration more_vars COLON type adv_action SEMICOLON vars
+    '''vars : VAR ID more_vars COLON type adv_action SEMICOLON vars
+            | VAR ID list_declaration COLON type ada_action SEMICOLON vars
             | empty'''
 
-
 def p_list_declaration(p):
-    '''list_declaration : LBRACKET exp RBRACKET
-                        | empty'''
+    '''list_declaration : LBRACKET var_const RBRACKET ivd_action'''
+
+# Identifies the dimensions of a variable when declared
+def p_ivd_action(p):
+    '''ivd_action : '''
+    dimensioned_varible_name = p[-4]
+    dimension_size_address = my_program.operand_stack.pop()
+    dimension_size = my_program.memory.get_value(dimension_size_address)
+    dimension_type = my_program.type_stack.pop()
+
+    # Verifies the dimension of the variable
+    if dimension_type != 'int':
+        print("Array indexes should be of type int")
+        sys.exit()
+    elif dimension_size < 1:
+        print("Array dimension should be greater than 0")
+        sys.exit()
+    else:
+        # Adds the information of the variable
+        my_program.dimensioned_varible_flag = True
+        my_program.current_dimensioned_varible = {
+            'name' : dimensioned_varible_name,
+            'lower_limit' : 0,
+            'upper_limit' : dimension_size,
+        }
 
 def p_more_vars(p):
     '''more_vars : COMMA ID more_vars
                  | empty'''
-    # Stores the variables found in the temporal list
+    # Stores the variables found in a temporal list
     if p[-1] is not None:
         variable_name = p[-1]
         my_program.temporal_variables.append(variable_name)
@@ -90,23 +114,48 @@ def p_more_vars(p):
 def p_adv_action(p):
     '''adv_action : '''
     variable_type = p[-1]
-    variable_name = p[-5]
-    my_program.temporal_variables.append(variable_name)
     my_program.temporal_variables.reverse()
 
     # Adds all the variables declared in the line to the function
     for variable in my_program.temporal_variables:
-        # Request the addresses depending of the scope
-        if my_program.current_scope == my_program.global_scope:
-            variable_address = my_program.memory.request_global_address(variable_type)
-        else:
-            variable_address = my_program.memory.request_local_address(variable_type)
+        variable_declared = my_program.function_directory.check_existing_variable(
+            my_program.current_scope, variable)
 
-        my_program.function_directory.add_variable_to_function(
+        if not variable_declared:
+            # Request the addresses depending of the scope
+            if my_program.current_scope == my_program.global_scope:
+                variable_address = my_program.memory.request_global_address(variable_type)
+            else:
+                variable_address = my_program.memory.request_local_address(variable_type)
+
+            my_program.function_directory.add_variable_to_function(
                 my_program.current_scope, variable_type, variable, variable_address)
 
     # Clears the list of temporal variables to start a new line of declarations
     del my_program.temporal_variables[:]
+
+# Adds a dimensioned variable to the current function
+def p_ada_action(p):
+    '''ada_action : '''
+    variable_type = p[-1]
+    variable = my_program.current_dimensioned_varible
+    variable_declared = my_program.function_directory.check_existing_variable(
+        my_program.current_scope, variable['name'])
+
+    if not variable_declared:
+        # Request the addresses needed for the variable
+        if my_program.current_scope == my_program.global_scope:
+            variable_address = my_program.memory.request_sequential_global_addresses(
+                variable_type, variable['upper_limit'])
+        else:
+            variable_address = my_program.memory.request_sequential_local_addresses(
+                variable_type, variable['upper_limit'])
+
+        variable['type'] = variable_type
+        variable['memory_adress'] = variable_address
+
+        my_program.function_directory.add_dimensioned_variable_to_function(
+            my_program.current_scope, variable)
 
 def p_functions(p):
     '''functions : DEF function_type ID LPAREN parameters RPAREN adf_action block enp_action functions
@@ -753,20 +802,20 @@ def make_parser():
 
     #print("Name of the file to be parsed")
     #file_name = input()
-    file_name = 'factorials.txt'
+    file_name = 'code_test3.txt'
 
     with open(file_name) as file_object:
         code = file_object.read()
         parser.parse(code)
 
-    #my_program.function_directory.print_directory()
+    my_program.function_directory.print_directory()
     #print(str(my_program.temporal_parameters_types))
     #my_program.print_stacks()
     #my_program.print_quadruples()
-    #my_program.memory.print_memory('global')
+    my_program.memory.print_memory('global')
 
-    virtual_machine = VirtualMachine(my_program.memory, my_program.function_directory,
-        my_program.quadruple_list)
+    # virtual_machine = VirtualMachine(my_program.memory, my_program.function_directory,
+    #     my_program.quadruple_list)
     #virtual_machine.memory.print_memory('global')
     #virtual_machine.execute()
     #virtual_machine.memory.print_memory('local', 'int')

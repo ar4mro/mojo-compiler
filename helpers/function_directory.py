@@ -73,6 +73,32 @@ class FunctionDirectory():
         else:
             print("The function you are trying to add the variable doesnt exists")
 
+    def add_dimensioned_variable_to_function(self, function_name, variable):
+        """Adds a dimensioned variable to its function variable table"""
+        function = self.get_function(function_name)
+        if function is not None:
+            if function['variables'].has_variable(variable['name']):
+                print("This function already has a variable with that name")
+            else:
+                # Adds the variable to the variable table and increments the
+                # number of local variables the function will use
+                function['variables'].add_dimensioned_variable(variable)
+                for i in range(variable['upper_limit']):
+                    function['number_of_local_variables'][variable['type']] += 1
+        else:
+            print("The function you are trying to add the variable doesnt exists")
+
+    def check_existing_variable(self, function_name, variable_name):
+        """Checks if a variable already exists in the function scope"""
+        function = self.get_function(function_name)
+        if function is not None:
+            if function['variables'].has_variable(variable_name):
+                return True
+            else:
+                return False
+        else:
+            print("The variable " + variable_name + " has been already declared")
+
     def add_temporal_to_function(self, function_name, temporal_type):
         """Increments the number of temporals the function has"""
         function = self.get_function(function_name)

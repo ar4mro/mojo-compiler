@@ -15,6 +15,10 @@ class VariableTable():
             'memory_adress' : variable_memory_adress
         }
 
+    def add_dimensioned_variable(self, variable):
+        """Adds a dimensioned variable to the list"""
+        self.variable_list[variable['name']] = variable 
+
     def has_variable(self, variable_name):
         """Checks if the list contains the variable asked"""
         return variable_name in self.variable_list.keys()

@@ -1,13 +1,9 @@
 program patito;
 
-def int multiplica(int a, int b) {
-	return a * b;
-}
+
+var a[5] : int;
+var b, c : int;
 
 main {
-	var i, j: int;
-	j = 2 + 3;
-	i = multiplica(5 + 2, 6 + 1);
-	print(i);
-	print(j);
+
 }
