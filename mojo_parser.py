@@ -38,6 +38,8 @@
 # vtc_action -> Verifies the type of the procedure call
 # arf_action -> Adds the result of the function to the stack
 # ivd_action -> Identifies the dimensions of a variable when declared
+# idv_action -> Identifies the dimensioned variable called
+# cdv_action -> Calls the dimensional variable verifications and resolves it
 
 import sys
 import ply.yacc as yacc
@@ -110,7 +112,7 @@ def p_more_vars(p):
         variable_name = p[-1]
         my_program.temporal_variables.append(variable_name)
 
-# Adds the variable to the current function
+# Adds a variable to the current function
 def p_adv_action(p):
     '''adv_action : '''
     variable_type = p[-1]
@@ -293,11 +295,84 @@ def p_statement(p):
                  | return'''
 
 def p_assignment(p):
-    '''assignment : ID pid_action list_assignment ASSIGN pop_action super_expression SEMICOLON soa_action'''
+    '''assignment : ID pid_action list_call ASSIGN pop_action super_expression SEMICOLON soa_action'''
 
-def p_list_assignment(p):
-    '''list_assignment : LBRACKET exp RBRACKET
+def p_list_call(p):
+    '''list_call : LBRACKET idv_action abm_action exp cdv_action rbm_action RBRACKET
                        | empty'''
+
+# Identifies a dimensioned variable when called
+def p_idv_action(p):
+    '''idv_action : '''
+    variable_name = p[-3]
+    my_program.operand_stack.pop()
+
+    # Checks if the variable exists in the local scope
+    variable = my_program.function_directory.get_function_variable(
+        my_program.current_scope, variable_name)
+
+    if variable is None:
+        # Checks if the variable exists in the global scope
+        variable = my_program.function_directory.get_function_variable(
+            my_program.global_scope, variable_name)
+        if variable is None:
+            print("The variable " + variable_name + " has not been declared")
+            sys.exit()
+        else:
+            if 'upper_limit' in variable:
+                # Appends the dimensioned variable to a stack, makes nesting
+                # vectors calls possible
+                my_program.dimensioned_varible_stack.append(variable)
+            else:
+                print("The variable " + variable_name + " is not an array")
+                sys.exit()
+    else:
+        if 'upper_limit' in variable:
+            # Appends the dimensioned variable to a stack, makes nesting
+            # vectors calls possible
+            my_program.dimensioned_varible_stack.append(variable)
+        else:
+            print("The variable " + variable_name + " is not an array")
+            sys.exit()
+
+# Verifies the boundaries of the dimensioned variable and resolves its index
+def p_cdv_action(p):
+    '''cdv_action : '''
+    index_address = my_program.operand_stack.pop()
+    index_type = my_program.type_stack.pop()
+
+    # Returns the last dimensioned variable called
+    dimensioned_variable = my_program.dimensioned_varible_stack.pop()
+
+    # Verifies the type of the index
+    if index_type != 'int':
+        print("Array indexes should be of type int")
+        sys.exit()
+    else:
+        # Verifies the boundaries
+        quadruple = Quadruple(my_program.quadruple_number, 'VERF_INDEX',
+            index_address, dimensioned_variable['lower_limit'], dimensioned_variable['upper_limit'])
+        my_program.quadruple_list.append(quadruple)
+        my_program.quadruple_number += 1
+
+        # The base address of the dimensioned variable must be stored in new
+        # address, this makes possible the adding of the base address number and
+        # not its content
+        base_address_proxy = my_program.memory.request_global_address('int',
+            dimensioned_variable['memory_adress'])
+        index_address_result = my_program.memory.request_global_address('int')
+
+        # Adds the base address number with the result of the index
+        quadruple = Quadruple(my_program.quadruple_number, '+', base_address_proxy,
+            index_address, index_address_result)
+        my_program.quadruple_list.append(quadruple)
+        my_program.quadruple_number += 1
+
+        # Stores the index address result int a dictionary to difference it
+        # from a regular address
+        result_proxy = {'index_address' : index_address_result}
+        my_program.operand_stack.append(result_proxy)
+        my_program.type_stack.append(dimensioned_variable['type'])
 
 # Solves the assignment and creates its quadruple
 def p_soa_action(p):
@@ -534,10 +609,6 @@ def p_boolean_value(p):
     '''boolean_value : TRUE
                      | FALSE'''
     p[0] = p[1]
-
-def p_list_call(p):
-    '''list_call : LBRACKET exp RBRACKET
-                 | empty'''
 
 def p_loop(p):
     '''loop : WHILE cwl_action LPAREN super_expression RPAREN cif_action block swl_action'''
@@ -802,22 +873,22 @@ def make_parser():
 
     #print("Name of the file to be parsed")
     #file_name = input()
-    file_name = 'code_test3.txt'
+    file_name = 'quick_binary.txt'
 
     with open(file_name) as file_object:
         code = file_object.read()
         parser.parse(code)
 
-    my_program.function_directory.print_directory()
+    #my_program.function_directory.print_directory()
     #print(str(my_program.temporal_parameters_types))
     #my_program.print_stacks()
     #my_program.print_quadruples()
-    my_program.memory.print_memory('global')
+    #my_program.memory.print_memory('global', 'int')
 
-    # virtual_machine = VirtualMachine(my_program.memory, my_program.function_directory,
-    #     my_program.quadruple_list)
+    virtual_machine = VirtualMachine(my_program.memory, my_program.function_directory,
+        my_program.quadruple_list)
     #virtual_machine.memory.print_memory('global')
-    #virtual_machine.execute()
+    virtual_machine.execute()
     #virtual_machine.memory.print_memory('local', 'int')
     #virtual_machine.memory.print_memory('global', 'int')
 

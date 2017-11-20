@@ -27,7 +27,8 @@ class Program():
         self.relational_operations = ['>', '<', '>=', '<=', '==', '!=']
         self.return_flag = False
         self.current_dimensioned_varible = {}
-        self.dimensioned_varible_flag = False 
+        self.dimensioned_varible_stack = []
+        self.dimensioned_varible_flag = False
 
     def print_stacks(self):
         """Print the temporal stacks of  the program"""

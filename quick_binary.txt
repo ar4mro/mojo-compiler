@@ -1,0 +1,84 @@
+program quick_binary;
+
+var vector[6] : int;
+
+def int partition(int low, int high) {
+	var i, j, pivot, temp : int;
+
+	pivot = vector[high];
+	i = low - 1;
+	j = low;
+
+	while(j < high) {
+		if(vector[j] <= pivot) {
+			i = i + 1;
+			temp = vector[i];
+			vector[i] = vector[j];
+			vector[j] = temp;
+		}
+		j = j + 1;
+	}
+
+	temp = vector[i + 1];
+	vector[i + 1] = vector[high];
+	vector[high] = temp;
+
+	return i + 1;
+}
+
+def void sort(int low, int high) {
+	var pi : int;
+
+	if(low < high) {
+		pi = partition(low, high);
+
+		sort(low, pi - 1);
+		sort(pi + 1, high);
+	}
+}
+
+def int binary_search(int value, int low, int high) {
+	var mid : int;
+
+	if (high < low) {
+		return -1;
+	}
+	mid = low + ((high - low) / 2);
+	if (vector[mid] > value) {
+		return binary_search(value, low, mid - 1);
+	} else {
+		if (vector[mid] < value) {
+			return binary_search(value, mid + 1, high);
+		} else {
+			return mid;
+		}
+	}
+}
+
+main {
+	var l : int;
+	var position : int;
+
+	vector[0] = 10;
+	vector[1] = 7;
+	vector[2] = 8;
+	vector[3] = 9;
+	vector[4] = 1;
+	vector[5] = 5;
+
+	sort(0, 5);
+	l = 0;
+
+	while(l < 6) {
+		print(vector[l]);
+		l = l + 1;
+	}
+
+	position = binary_search(20, 0, 5);
+	if (position > 0) {
+		print("Found at postion:");
+		print(position);
+	} else {
+		print("Not found");
+	}
+}

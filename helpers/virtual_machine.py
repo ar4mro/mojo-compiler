@@ -55,6 +55,23 @@ class VirtualMachine():
             right_operand_address = current_instruction.right_operand
             result_address = current_instruction.result
 
+            # Gets value inside the address that is inside the address the
+            # dictionary stores, these operands are the result  of dimensioned
+            # variables calls
+            if isinstance(left_operand_address, dict):
+                left_operand_address = current_memory.get_value(
+                    left_operand_address['index_address'])
+            if isinstance(right_operand_address, dict):
+                right_operand_address = current_memory.get_value(
+                    right_operand_address['index_address'])
+            if isinstance(result_address, dict):
+                result_address = current_memory.get_value(
+                    result_address['index_address'])
+
+            # print(left_operand_address)
+            # print(right_operand_address)
+            # print(result_address)
+
             # Acts like a switch, differents actions, different instructions
             if instruction_action == '+':
                 left_operand = current_memory.get_value(left_operand_address)
@@ -88,7 +105,12 @@ class VirtualMachine():
                     print("ERROR: Divisions by 0 are not allowed")
                     sys.exit()
                 else:
-                    result = left_operand / right_operand
+                    # Exact division if a float is involved
+                    if isinstance(left_operand, float) or isinstance(right_operand, float):
+                        result = left_operand / right_operand
+                    else:
+                        result = int(left_operand / right_operand)
+
                     # Stores the result and pass to the next quadruple
                     current_memory.edit_value(result_address, result)
                     self.number_of_current_instruction += 1
@@ -178,6 +200,16 @@ class VirtualMachine():
                     self.number_of_current_instruction = result_address - 1
                 else:
                     self.number_of_current_instruction += 1
+            elif instruction_action == 'VERF_INDEX':
+                index = current_memory.get_value(left_operand_address)
+                lower_limit = right_operand_address
+                upper_limit = result_address
+
+                if index >= lower_limit and index < upper_limit:
+                    self.number_of_current_instruction += 1
+                else:
+                    print("Index out of bound")
+                    sys.exit()
             elif instruction_action == 'RETURN':
                 left_operand = current_memory.get_value(left_operand_address)
                 result = left_operand

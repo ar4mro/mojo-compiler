@@ -1,9 +1,0 @@
-program patito;
-
-
-var a[5] : int;
-var b, c : int;
-
-main {
-
-}
