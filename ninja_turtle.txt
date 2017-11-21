@@ -1,0 +1,39 @@
+program ninja;
+
+def void drawer (int n, string pen, string fill) {
+  var i : int;
+
+  set_speed(0);
+  pen_color(pen);
+  fill_color(fill);
+  begin_fill();
+
+  while (i <= 180) {
+      move_forward(n);
+      turn_right(30);
+      move_forward(n/3);
+      turn_left(60);
+      move_forward(n/2);
+      turn_right(30);
+      pen_up();
+      set_position(0,0);
+      pen_down();
+      turn_right(2);
+      i = i + 1;
+  }
+  end_fill();
+}
+
+main {
+  var leaf_length : int;
+  var pen, fill : string;
+
+  pen = input("Enter pen color: ");
+  fill = input("Enter the fill color: ");
+  leaf_length = input("Enter the leaf length");
+
+  create_turtle();
+  set_speed(0);
+  drawer(leaf_length, pen, fill);
+  finish_drawing();
+}

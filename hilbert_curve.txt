@@ -1,0 +1,53 @@
+program hilbert_curve;
+
+def void hilbert(int step, string rule, int angle, int depth) {
+  if(depth > 0){
+    if(rule == "A"){
+      turn_left(angle);
+      hilbert(step, "B", angle, depth - 1);
+      move_forward(step);
+      turn_right(angle);
+      hilbert(step, "A", angle, depth - 1);
+      move_forward(step);
+      hilbert(step, "A", angle, depth - 1);
+      turn_right(angle);
+      move_forward(step);
+      hilbert(step, "B", angle, depth - 1);
+      turn_left(angle);
+    }
+    if(rule == "B"){
+      turn_right(angle);
+      hilbert(step, "A", angle, depth - 1);
+      move_forward(step);
+      turn_left(angle);
+      hilbert(step, "B", angle, depth - 1);
+      move_forward(step);
+      hilbert(step, "B", angle, depth - 1);
+      turn_left(angle);
+      move_forward(step);
+      hilbert(step, "A", angle, depth - 1);
+      turn_right(angle);
+    }
+  }
+}
+
+main {
+  var step, angle, depth : int;
+  var rule, pen, fill : string;
+
+  step = input("Enter the lenght of the hilbert curve lines");
+  rule = input("Enter A or B for different curve patterns");
+  angle = input("Enter angle of hilbert curve pattern");
+  depth = input("Enter the depth of the hilbert curve");
+  pen = input("Enter the pen color");
+
+	create_turtle();
+  pen_color(pen);
+  set_speed(0);
+  pen_up();
+  set_position(0, 0);
+  pen_down();
+  draw_circle(20);
+  hilbert(step, rule, angle, depth);
+  finish_drawing();
+}

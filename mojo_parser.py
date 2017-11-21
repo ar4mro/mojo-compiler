@@ -43,6 +43,35 @@
 # tnf_action -> Turns on the negation flag
 # snc_action -> Solves the negation call
 
+# vcv_action -> Verifies that variable is of type string
+
+### LIST OF PREDEFINED FUNCTIONS ###
+# pfc_create_turtle  -> Creates a new instance of a turtle object
+# pfc_reset          -> Erases the current turtle's drawings and
+#                       resets the turtle at the starting point
+# pfc_finish_drawing -> Stops the graphical output window
+# pfc_pen_up         -> The turtle stops drawing when moved
+# pfc_pen_down       -> The turtle draws when moved
+# pfc_begin_fill     -> Indicates that next drawings will be filled
+#                       with fillcolor
+# pfc_end_fill       -> Previous drawings are filled with the current fillcolor
+# pfc_pen_color      -> Sets the current color of the pen
+# pfc_fill_color     -> Sets the current color of the filling
+# pfc_pen_width      -> Sets the width size of the pen
+# pfc_move_forward   -> Moves the turtle a certain distance forward
+# pfc_move_right     -> Moves the turtle a certain distance
+#                       to the right(90 degrees)
+# pfc_move_left      -> Moves the turtle a certain distance
+#                       to the left(-90 degrees)
+# pfc_turn_right     -> Turns the turtle certain degrees to the right
+# pfc_turn_left      -> Turns the turtle certain degrees to the left
+# pfc_draw_square    -> Draws a square
+# pfc_draw_triangle  -> Draws an equilateral triangle
+# pfc_draw_circle    -> Draws a circle of a certain radius length
+# pfc_draw_rectangle -> Draws a rectangle with a certain upper and bottom
+# side length and a certain left and right side length
+# pfc_set_position   -> Set the turtle in the position received
+
 import sys
 import ply.yacc as yacc
 
@@ -286,7 +315,7 @@ def p_block(p):
 
 def p_statements(p):
     '''statements : vars statement statements
-                  | empty'''
+                  | vars empty'''
 
 def p_statement(p):
     '''statement : assignment
@@ -295,7 +324,7 @@ def p_statement(p):
                  | loop
                  | procedure_call
                  | predefined_function_call
-                 | return'''
+                 | return '''
 
 def p_assignment(p):
     '''assignment : ID pid_action list_call ASSIGN pop_action super_expression SEMICOLON soa_action
@@ -783,22 +812,27 @@ def p_arf_action(p):
     my_program.type_stack.append(function_type)
 
 def p_predefined_function_call(p):
-    '''predefined_function_call : CREATE_TURTLE LPAREN RPAREN SEMICOLON
-                                | RESET LPAREN RPAREN SEMICOLON
-                                | PEN_UP LPAREN RPAREN SEMICOLON
-                                | PEN_DOWN LPAREN RPAREN SEMICOLON
-                                | PICK_COLOR LPAREN SCONST RPAREN SEMICOLON
-                                | SET_LINE_WIDTH LPAREN exp RPAREN SEMICOLON
-                                | MOVE_FORWARD LPAREN exp RPAREN SEMICOLON
-                                | MOVE_RIGHT LPAREN exp RPAREN SEMICOLON
-                                | MOVE_LEFT LPAREN exp RPAREN SEMICOLON
-                                | TURN_RIGHT LPAREN exp RPAREN SEMICOLON
-                                | TURN_LEFT LPAREN exp RPAREN SEMICOLON
-                                | DRAW_LINE LPAREN exp RPAREN SEMICOLON
-                                | DRAW_SQUARE LPAREN exp RPAREN SEMICOLON
-                                | DRAW_TRIANGLE LPAREN exp RPAREN SEMICOLON
-                                | DRAW_CIRCLE LPAREN exp RPAREN SEMICOLON
-                                | DRAW_RECTANGLE LPAREN exp RPAREN SEMICOLON'''
+    '''predefined_function_call : CREATE_TURTLE LPAREN RPAREN pfc_create_turtle SEMICOLON
+                                | RESET LPAREN RPAREN pfc_reset SEMICOLON
+                                | FINISH_DRAWING LPAREN RPAREN pfc_finish_drawing SEMICOLON
+                                | PEN_UP LPAREN RPAREN  pfc_pen_up SEMICOLON
+                                | PEN_DOWN LPAREN RPAREN pfc_pen_down SEMICOLON
+                                | BEGIN_FILL LPAREN RPAREN pfc_begin_fill SEMICOLON
+                                | END_FILL LPAREN RPAREN pfc_end_fill SEMICOLON
+                                | PEN_COLOR LPAREN var_string RPAREN pfc_pen_color SEMICOLON
+                                | FILL_COLOR LPAREN var_string RPAREN pfc_fill_color SEMICOLON
+                                | PEN_WIDTH LPAREN exp RPAREN pfc_pen_width SEMICOLON
+                                | MOVE_FORWARD LPAREN exp RPAREN pfc_move_forward SEMICOLON
+                                | MOVE_RIGHT LPAREN exp RPAREN pfc_move_right SEMICOLON
+                                | MOVE_LEFT LPAREN exp RPAREN pfc_move_left SEMICOLON
+                                | TURN_RIGHT LPAREN exp RPAREN pfc_turn_right SEMICOLON
+                                | TURN_LEFT LPAREN exp RPAREN pfc_turn_left SEMICOLON
+                                | DRAW_SQUARE LPAREN exp RPAREN pfc_draw_square SEMICOLON
+                                | DRAW_TRIANGLE LPAREN exp RPAREN pfc_draw_triangle SEMICOLON
+                                | DRAW_CIRCLE LPAREN exp RPAREN pfc_draw_circle SEMICOLON
+                                | DRAW_RECTANGLE LPAREN exp COMMA exp RPAREN pfc_draw_rectangle SEMICOLON
+                                | SET_POSITION LPAREN exp COMMA exp RPAREN pfc_set_position SEMICOLON
+                                | SET_SPEED LPAREN exp RPAREN pfc_set_speed SEMICOLON'''
 
 def p_return(p):
     '''return : RETURN super_expression SEMICOLON srf_action'''
@@ -851,6 +885,202 @@ def p_empty(p):
 def p_error(p):
     print('Syntax error at input line {0}'.format(p.lexer.lineno))
     sys.exit()
+
+# START OF PREDEFINED FUNCTIONS
+def p_pfc_create_turtle(p):
+    '''pfc_create_turtle : '''
+    # Creates the CREATE_TURTLE quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'CREATE_TURTLE', None, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_reset(p):
+    '''pfc_reset : '''
+    # Creates the RESET quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'RESET', None, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_finish_drawing(p):
+    '''pfc_finish_drawing : '''
+    # Creates the FINISH_DRAWING quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'FINISH_DRAWING', None, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_pen_up(p):
+    '''pfc_pen_up : '''
+    # Creates the PEN_UP quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'PEN_UP', None, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_pen_down(p):
+    '''pfc_pen_down : '''
+    # Creates the PEN_DOWN quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'PEN_DOWN', None, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_begin_fill(p):
+    '''pfc_begin_fill : '''
+    # Creates the BEGIN_FILL quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'BEGIN_FILL', None, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_end_fill(p):
+    '''pfc_end_fill : '''
+    # Creates the END_FILL quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'END_FILL', None, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_pen_color(p):
+    '''pfc_pen_color : '''
+    # Gets the color (string constant) from the operand stack
+    operand = my_program.operand_stack.pop()
+    # Creates the PEN_COLOR quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'PEN_COLOR', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_fill_color(p):
+    '''pfc_fill_color : '''
+    # Gets the color (string constant) from the operand stack
+    operand = my_program.operand_stack.pop()
+    # Creates the PEN_COLOR quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'FILL_COLOR', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_pen_width(p):
+    '''pfc_pen_width : '''
+    # Gets the width size number (exp) from the operand stack
+    operand = my_program.operand_stack.pop()
+    # Creates the PEN_WIDTH quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'PEN_WIDTH', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_move_forward(p):
+    '''pfc_move_forward : '''
+    # Gets the distance number (exp) from the operand stack
+    operand = my_program.operand_stack.pop()
+    # Creates the MOVE_FORWARD quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'MOVE_FORWARD', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_move_right(p):
+    '''pfc_move_right : '''
+    # Gets the distance number (exp) from the operand stack
+    operand = my_program.operand_stack.pop()
+    # Creates the MOVE_RIGHT quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'MOVE_RIGHT', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_move_left(p):
+    '''pfc_move_left : '''
+    # Gets the distance number (exp) from the operand stack
+    operand = my_program.operand_stack.pop()
+    # Creates the MOVE_LEFT quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'MOVE_LEFT', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_turn_right(p):
+    '''pfc_turn_right : '''
+    # Gets the degrees number (exp) from the operand stack
+    operand = my_program.operand_stack.pop()
+    # Creates the TURN_RIGHT quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'TURN_RIGHT', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_turn_left(p):
+    '''pfc_turn_left : '''
+    # Gets the degrees number (exp) from the operand stack
+    operand = my_program.operand_stack.pop()
+    # Creates the TURN_LEFT quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'TURN_LEFT', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_draw_square(p):
+    '''pfc_draw_square : '''
+    # Gets the length of the sides of the square (exp) from the operand stack
+    operand = my_program.operand_stack.pop()
+    # Creates the DRAW_SQUARE quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'DRAW_SQUARE', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_draw_triangle(p):
+    '''pfc_draw_triangle : '''
+    # Gets the length of the sides of the triangle (exp) from the operand stack
+    operand = my_program.operand_stack.pop()
+    # Creates the DRAW_TRIANGLE quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'DRAW_TRIANGLE', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_draw_circle(p):
+    '''pfc_draw_circle : '''
+    # Gets the length of the radius of the circle (exp) from the operand stack
+    operand = my_program.operand_stack.pop()
+    # Creates the DRAW_CIRCLE quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'DRAW_CIRCLE', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_draw_rectangle(p):
+    '''pfc_draw_rectangle : '''
+    # Gets the length of the left and right sides of the rectangle (exp) from the operand stack
+    height = my_program.operand_stack.pop()
+    # Gets the length of the upper and bottom sides of the rectangle (exp) from the operand stack
+    width = my_program.operand_stack.pop()
+    # Creates the DRAW_RECTANGLE quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'DRAW_RECTANGLE', width, height, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_set_position(p):
+    '''pfc_set_position : '''
+    # Gets the position on X axis
+    y_axis = my_program.operand_stack.pop()
+    # Gets the position on Y axis
+    x_axis = my_program.operand_stack.pop()
+    # Creates the SET_POSITION quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'SET_POSITION', x_axis, y_axis, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+def p_pfc_set_speed(p):
+    '''pfc_set_speed : '''
+    # Gets the speed number
+    operand = my_program.operand_stack.pop()
+    # Creates the SET_SPEED quadruple
+    quadruple = Quadruple(my_program.quadruple_number, 'SET_SPEED', operand, None, None)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
+
+# Check if it is a variable or a string constant and push to operand stack
+def p_var_string(p):
+    '''var_string : ID pid_action vcv_action
+                 | SCONST pso_action'''
+
+# Verify that the variable to push to stack is of type STRING and pushes to stack
+def p_vcv_action(p):
+    '''vcv_action : '''
+    variable = p[-2]
+    variable_type = my_program.type_stack[-1]
+
+    # Checks if the variable type is string
+    if variable_type != 'string':
+        print("The variable: " + variable + " of the color function is not a string")
+        sys.exit()
 
 def solve_operation(p):
     """Solve an operation from the stacks"""
@@ -912,7 +1142,7 @@ def make_parser():
 
     #print("Name of the file to be parsed")
     #file_name = input()
-    file_name = 'quick_binary.txt'
+    file_name = 'hilbert_curve.txt'
 
     with open(file_name) as file_object:
         code = file_object.read()
@@ -921,7 +1151,7 @@ def make_parser():
     #my_program.function_directory.print_directory()
     #print(str(my_program.temporal_parameters_types))
     #my_program.print_stacks()
-    #my_program.print_quadruples()
+    my_program.print_quadruples()
     #my_program.memory.print_memory('global', 'int')
 
     virtual_machine = VirtualMachine(my_program.memory, my_program.function_directory,

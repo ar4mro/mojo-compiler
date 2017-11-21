@@ -32,20 +32,25 @@ reserved = {
     # Predefined functions
     'create_turtle' : 'CREATE_TURTLE',
     'reset' : 'RESET',
+    'finish_drawing' : 'FINISH_DRAWING',
     'pen_up' : 'PEN_UP',
     'pen_down' : 'PEN_DOWN',
-    'pick_color' : 'PICK_COLOR',
-    'set_line_width' : 'SET_LINE_WIDTH',
+    'begin_fill' : 'BEGIN_FILL',
+    'end_fill' : 'END_FILL',
+    'pen_color' : 'PEN_COLOR',
+    'fill_color' : 'FILL_COLOR',
+    'pen_width' : 'PEN_WIDTH',
     'move_forward' : 'MOVE_FORWARD',
     'move_right' : 'MOVE_RIGHT',
     'move_left' : 'MOVE_LEFT',
     'turn_right' : 'TURN_RIGHT',
     'turn_left' : 'TURN_LEFT',
-    'draw_line' : 'DRAW_LINE',
     'draw_square' : 'DRAW_SQUARE',
     'draw_triangle' : 'DRAW_TRIANGLE',
     'draw_circle' : 'DRAW_CIRCLE',
-    'draw_rectangle' : 'DRAW_RECTANGLE'
+    'draw_rectangle' : 'DRAW_RECTANGLE',
+    'set_position' : 'SET_POSITION',
+    'set_speed' : 'SET_SPEED'
 }
 
 # Token list (Tuple)

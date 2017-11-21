@@ -2,6 +2,7 @@ from .function_directory import FunctionDirectory
 from .memory import Memory
 
 from ast import literal_eval
+import turtle
 import sys
 
 class VirtualMachine():
@@ -35,7 +36,7 @@ class VirtualMachine():
         for i in range(function_called['function']['number_of_temporal_variables']['bool']):
             function_called['memory'].request_temporal_address('bool')
 
-    def get_input_value(self, value):
+    def get_input_type(self, value):
         """"""
         try:
             return type(literal_eval(value))
@@ -43,16 +44,27 @@ class VirtualMachine():
             # A string, so return str
             return str
 
-    def get_string_input_value(self, value):
+    def get_string_input_type(self, value):
         """Determines the type of a value, returns it as a string"""
-        if self.get_input_value(value) is int:
+        if self.get_input_type(value) is int:
             return 'int'
-        elif self.get_input_value(value) is float:
+        elif self.get_input_type(value) is float:
             return 'float'
-        elif self.get_input_value(value) is bool:
+        elif self.get_input_type(value) is bool:
             return 'bool'
-        elif self.get_input_value(value) is str:
+        elif self.get_input_type(value) is str:
             return 'string'
+
+    def set_input_type(self, value):
+        """"""
+        if self.get_input_type(value) is int:
+            return int(value)
+        elif self.get_input_type(value) is float:
+            return float(value)
+        elif self.get_input_type(value) is bool:
+            return bool(value)
+        elif self.get_input_type(value) is str:
+            return value
 
     def execute(self):
         """Executes the instrucions"""
@@ -67,7 +79,7 @@ class VirtualMachine():
         # Executes for each quadruple
         while self.number_of_current_instruction < self.number_of_instructions:
             current_instruction = self.instructions[self.number_of_current_instruction]
-            #print(current_instruction)
+            print(current_instruction)
 
             # Obtains the type of action, the addresses of the operands
             # and where the result will be stored
@@ -215,8 +227,9 @@ class VirtualMachine():
                 variable_type = left_operand_address
                 message = current_memory.get_value(right_operand_address)
 
-                input_value = input(str(message))
-                input_value_type = self.get_string_input_value(input_value)
+                input_value = input(str(message) + "\n")
+                input_value_type = self.get_string_input_type(input_value)
+                input_value = self.set_input_type(input_value)
 
                 # Assigns only if the types of the input and the variable match
                 if input_value_type == variable_type:
@@ -305,3 +318,164 @@ class VirtualMachine():
 
                 # Returns to the next instruction of the function caller
                 self.number_of_current_instruction = instruction_number_to_back_list.pop() + 1
+            elif instruction_action == 'CREATE_TURTLE':
+                # Initialices a new turtle
+                current_turtle = turtle.Turtle()
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'RESET':
+                # Erases the drawings of current turtle and places it at start
+                current_turtle.reset()
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'FINISH_DRAWING':
+                # Stops the graphical output window from interaction
+                turtle.done()
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'PEN_UP':
+                # Stops the current turtle from drawing when moving
+                current_turtle.penup()
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'PEN_DOWN':
+                # Restarts the current turtle from drawing when moving
+                current_turtle.pendown()
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'BEGIN_FILL':
+                #Indicates that next drawings will be filled with fillcolor
+                current_turtle.begin_fill()
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'END_FILL':
+                #Previous drawings are filled with the current fillcolor
+                current_turtle.end_fill()
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'PEN_COLOR':
+                # Sets the current color of the pen
+                left_operand = current_memory.get_value(left_operand_address)
+                color_name = left_operand
+                color_name = color_name[1:-1]
+                current_turtle.pencolor(color_name)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'FILL_COLOR':
+                # Sets the current color of the filling
+                left_operand = current_memory.get_value(left_operand_address)
+                color_name = left_operand
+                color_name = color_name[1:-1]
+                current_turtle.fillcolor(color_name)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'PEN_WIDTH':
+                # Sets the width of the pen
+                left_operand = current_memory.get_value(left_operand_address)
+                current_turtle.width(left_operand)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'MOVE_FORWARD':
+                # Get the distance to move forward to
+                left_operand = int(current_memory.get_value(left_operand_address))
+                # Moves the turtle forward the distance of left_operand
+                current_turtle.forward(left_operand)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'MOVE_RIGHT':
+                # Get the distance to move
+                left_operand = current_memory.get_value(left_operand_address)
+                # Turns turtle 90 degrees to the right
+                current_turtle.right(90)
+                # Moves the turtle forward the distance of left_operand
+                current_turtle.forward(left_operand)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'MOVE_LEFT':
+                # Get the distance to move
+                left_operand = current_memory.get_value(left_operand_address)
+                # Turns turtle 90 degrees to the left
+                current_turtle.left(90)
+                # Moves the turtle forward the distance of left_operand
+                current_turtle.forward(left_operand)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'TURN_RIGHT':
+                # Get the degrees to turn right
+                left_operand = current_memory.get_value(left_operand_address)
+                # Turns turtle certain left_operand degrees to the right
+                current_turtle.right(left_operand)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'TURN_LEFT':
+                # Get the degrees to turn left
+                left_operand = current_memory.get_value(left_operand_address)
+                # Turns turtle certain left_operand degrees to the left
+                current_turtle.left(left_operand)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'DRAW_SQUARE':
+                # Get the size of the sides of the square
+                left_operand = current_memory.get_value(left_operand_address)
+                # Draws a square
+                current_turtle.forward(left_operand)
+                current_turtle.right(90)
+                current_turtle.forward(left_operand)
+                current_turtle.right(90)
+                current_turtle.forward(left_operand)
+                current_turtle.right(90)
+                current_turtle.forward(left_operand)
+                current_turtle.right(90)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'DRAW_TRIANGLE':
+                # Get the size of the sides of the triangle
+                left_operand = current_memory.get_value(left_operand_address)
+                # Draws an equilateral triangle
+                current_turtle.forward(left_operand)
+                current_turtle.left(120)
+                current_turtle.forward(left_operand)
+                current_turtle.left(120)
+                current_turtle.forward(left_operand)
+                current_turtle.left(120)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'DRAW_CIRCLE':
+                # Get the radius of the circle
+                left_operand = current_memory.get_value(left_operand_address)
+                # Draws an equilateral triangle
+                current_turtle.circle(left_operand)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'DRAW_RECTANGLE':
+                # Get the size of the upper and bottom side of the rectangle
+                left_operand = current_memory.get_value(left_operand_address)
+                # Get the size of the left and right side of the rectangle
+                right_operand = current_memory.get_value(right_operand_address)
+                # Draws a rectangle
+                current_turtle.forward(left_operand)
+                current_turtle.right(90)
+                current_turtle.forward(right_operand)
+                current_turtle.right(90)
+                current_turtle.forward(left_operand)
+                current_turtle.right(90)
+                current_turtle.forward(right_operand)
+                current_turtle.right(90)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'SET_POSITION':
+                # Get the position in X axis
+                left_operand = current_memory.get_value(left_operand_address)
+                # Get the position in Y axis
+                right_operand = current_memory.get_value(right_operand_address)
+                # Set position of turtle
+                current_turtle.setposition(left_operand, right_operand)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'SET_SPEED':
+                # Get the speed rate number
+                left_operand = current_memory.get_value(left_operand_address)
+                # Set turtle speed rate
+                current_turtle.speed(left_operand)
+                # Pass to the next quadruple
+                self.number_of_current_instruction += 1
