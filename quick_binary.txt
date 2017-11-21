@@ -74,7 +74,7 @@ main {
 		l = l + 1;
 	}
 
-	position = binary_search(20, 0, 5);
+	position = binary_search(9, 0, 5);
 	if (position > 0) {
 		print("Found at postion:");
 		print(position);

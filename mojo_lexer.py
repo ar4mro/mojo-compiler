@@ -20,6 +20,7 @@ reserved = {
     'and' : 'AND',
     'or' : 'OR',
     'not' : 'NOT',
+    'input' : 'READ',
     'print' : 'PRINT',
     'def' : 'DEF',
     'while' : 'WHILE',

@@ -40,6 +40,8 @@
 # ivd_action -> Identifies the dimensions of a variable when declared
 # idv_action -> Identifies the dimensioned variable called
 # cdv_action -> Calls the dimensional variable verifications and resolves it
+# tnf_action -> Turns on the negation flag
+# snc_action -> Solves the negation call
 
 import sys
 import ply.yacc as yacc
@@ -264,6 +266,7 @@ def p_enp_action(p):
     my_program.return_flag = False
 
     # Reset the temporal memory
+    my_program.current_scope = my_program.global_scope
     my_program.memory.reset_temporal_memory()
 
 # Adds the main function to function directory
@@ -279,10 +282,10 @@ def p_amf_action(p):
     quadruple.fill_quadruple_jump(my_program.quadruple_number)
 
 def p_block(p):
-    '''block : LBRACE vars statements RBRACE'''
+    '''block : LBRACE statements RBRACE'''
 
 def p_statements(p):
-    '''statements : statement statements
+    '''statements : vars statement statements
                   | empty'''
 
 def p_statement(p):
@@ -295,7 +298,27 @@ def p_statement(p):
                  | return'''
 
 def p_assignment(p):
-    '''assignment : ID pid_action list_call ASSIGN pop_action super_expression SEMICOLON soa_action'''
+    '''assignment : ID pid_action list_call ASSIGN pop_action super_expression SEMICOLON soa_action
+                  | ID pid_action list_call ASSIGN pop_action READ LPAREN super_expression RPAREN crq_action SEMICOLON soa_action'''
+
+# Creates the read quadruple
+def p_crq_action(p):
+    '''crq_action : '''
+    message_address = my_program.operand_stack.pop()
+    my_program.type_stack.pop()
+
+    # Gets the type of the variable where the input will be stored and request
+    # a temporal address to resolve its assignment
+    variable_type = my_program.type_stack[-1]
+    input_address = my_program.memory.request_temporal_address(variable_type)
+
+    my_program.operand_stack.append(input_address)
+    my_program.type_stack.append(variable_type)
+
+    quadruple = Quadruple(my_program.quadruple_number, 'READ', variable_type,
+        message_address, input_address)
+    my_program.quadruple_list.append(quadruple)
+    my_program.quadruple_number += 1
 
 def p_list_call(p):
     '''list_call : LBRACKET idv_action abm_action exp cdv_action rbm_action RBRACKET
@@ -446,8 +469,8 @@ def p_sif_action(p):
 
 def p_super_expression(p):
     '''super_expression : negation expression sol_action
-                        | negation expression sol_action AND pop_action negation super_expression
-                        | negation expression sol_action OR pop_action negation super_expression'''
+                        | negation expression sol_action AND pop_action super_expression
+                        | negation expression sol_action OR pop_action super_expression'''
 
 # Solve logical operations
 def p_sol_action(p):
@@ -459,6 +482,22 @@ def p_sol_action(p):
 def p_negation(p):
     '''negation : NOT
                 | empty'''
+
+# def p_snc_action(p):
+#     '''snc_action : '''
+#     if my_program.negation_stack[-1]:
+#         my_program.negation_stack.pop()
+#         left_operand = my_program.operand_stack[-1]
+#
+#         quadruple = Quadruple(my_program.quadruple_number, 'NOT', left_operand,
+#             None, left_operand)
+#         my_program.quadruple_list.append(quadruple)
+#         my_program.quadruple_number += 1
+#
+# # Turns on the negation flag
+# def p_tnf_action(p):
+#     '''tnf_action : '''
+#     my_program.negation_stack.append(True)
 
 def p_expression(p):
     '''expression : exp sor_action
@@ -794,10 +833,10 @@ def p_srf_action(p):
     my_program.quadruple_list.append(quadruple)
     my_program.quadruple_number += 1
 
-
 def p_write(p):
     '''write : PRINT LPAREN super_expression cwr_action RPAREN SEMICOLON'''
 
+# Creates the write quadruple
 def p_cwr_action(p):
     '''cwr_action : '''
     operand = my_program.operand_stack.pop()

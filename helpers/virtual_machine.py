@@ -1,5 +1,7 @@
 from .function_directory import FunctionDirectory
 from .memory import Memory
+
+from ast import literal_eval
 import sys
 
 class VirtualMachine():
@@ -32,6 +34,25 @@ class VirtualMachine():
             function_called['memory'].request_temporal_address('string')
         for i in range(function_called['function']['number_of_temporal_variables']['bool']):
             function_called['memory'].request_temporal_address('bool')
+
+    def get_input_value(self, value):
+        """"""
+        try:
+            return type(literal_eval(value))
+        except (ValueError, SyntaxError):
+            # A string, so return str
+            return str
+
+    def get_string_input_value(self, value):
+        """Determines the type of a value, returns it as a string"""
+        if self.get_input_value(value) is int:
+            return 'int'
+        elif self.get_input_value(value) is float:
+            return 'float'
+        elif self.get_input_value(value) is bool:
+            return 'bool'
+        elif self.get_input_value(value) is str:
+            return 'string'
 
     def execute(self):
         """Executes the instrucions"""
@@ -189,6 +210,21 @@ class VirtualMachine():
                 left_operand = current_memory.get_value(left_operand_address)
 
                 print(str(left_operand))
+                self.number_of_current_instruction += 1
+            elif instruction_action == 'READ':
+                variable_type = left_operand_address
+                message = current_memory.get_value(right_operand_address)
+
+                input_value = input(str(message))
+                input_value_type = self.get_string_input_value(input_value)
+
+                # Assigns only if the types of the input and the variable match
+                if input_value_type == variable_type:
+                    current_memory.edit_value(result_address, input_value)
+                else:
+                    print("Input type mismatch")
+                    sys.exit()
+
                 self.number_of_current_instruction += 1
             elif instruction_action == 'GOTO':
                 # Points to a new quadruple

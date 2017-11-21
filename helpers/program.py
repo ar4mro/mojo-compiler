@@ -29,6 +29,7 @@ class Program():
         self.current_dimensioned_varible = {}
         self.dimensioned_varible_stack = []
         self.dimensioned_varible_flag = False
+        self.negation_stack = []
 
     def print_stacks(self):
         """Print the temporal stacks of  the program"""
