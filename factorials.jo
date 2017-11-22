@@ -24,8 +24,8 @@ main {
 	i = factorial(10);
 	j = factorial2(10);
 
-	print("Factorial recursivo:");
+	print("Recursive factorial:");
 	print(i);
-	print("Factorial loop:");
+	print("Loop factorial:");
 	print(j);
 }
