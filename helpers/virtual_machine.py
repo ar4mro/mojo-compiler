@@ -66,7 +66,7 @@ class VirtualMachine():
         elif self.get_input_type(value) is str:
             return value
 
-    def execute(self):
+    def execute(self, print_step_by_step):
         """Executes the instrucions"""
         function_called = {} # Stores the function information when one is called
         actual_parameter = 0 # The parameter position of a function
@@ -79,7 +79,9 @@ class VirtualMachine():
         # Executes for each quadruple
         while self.number_of_current_instruction < self.number_of_instructions:
             current_instruction = self.instructions[self.number_of_current_instruction]
-            #print(current_instruction)
+
+            if print_step_by_step == 'Y':
+                print(current_instruction)
 
             # Obtains the type of action, the addresses of the operands
             # and where the result will be stored
