@@ -109,8 +109,9 @@ $ python3 mojo_parser.py
 # Enter the name of your program
 $ ninja_turtle.jo
 ```
-If the program is turtle based expect a graphical output like the following one.
+If the program is turtle based expect a graphical output like the following one:
 
+![Output](https://github.com/alv2r/mojo-compiler/blob/master/no_project_related/ninja.gif)
 
 ## Additional Information
 
