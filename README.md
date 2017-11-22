@@ -115,6 +115,10 @@ If the program is turtle based expect a graphical output like the following one:
 
 ## Additional Information
 
+### Possible Issues
+
+When executing a mojo program and string inputs are expected, add double quotes " " around the word.
+
 ### Built With
 
 * [PLY](http://www.dabeaz.com/ply/ply.html) - Python implementation of Lex and Yacc
@@ -127,4 +131,4 @@ If the program is turtle based expect a graphical output like the following one:
 
 ### License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
