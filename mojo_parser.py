@@ -42,34 +42,29 @@
 # cdv_action -> Calls the dimensional variable verifications and resolves it
 # tnf_action -> Turns on the negation flag
 # snc_action -> Solves the negation call
-
 # vcv_action -> Verifies that variable is of type string
 
 ### LIST OF PREDEFINED FUNCTIONS ###
+# Functions proper of the application of the language
 # pfc_create_turtle  -> Creates a new instance of a turtle object
-# pfc_reset          -> Erases the current turtle's drawings and
-#                       resets the turtle at the starting point
+# pfc_reset          -> Erases the current turtle's drawings and resets the turtle at the starting point
 # pfc_finish_drawing -> Stops the graphical output window
 # pfc_pen_up         -> The turtle stops drawing when moved
 # pfc_pen_down       -> The turtle draws when moved
-# pfc_begin_fill     -> Indicates that next drawings will be filled
-#                       with fillcolor
+# pfc_begin_fill     -> Indicates that next drawings will be filled with fillcolor
 # pfc_end_fill       -> Previous drawings are filled with the current fillcolor
 # pfc_pen_color      -> Sets the current color of the pen
 # pfc_fill_color     -> Sets the current color of the filling
 # pfc_pen_width      -> Sets the width size of the pen
 # pfc_move_forward   -> Moves the turtle a certain distance forward
-# pfc_move_right     -> Moves the turtle a certain distance
-#                       to the right(90 degrees)
-# pfc_move_left      -> Moves the turtle a certain distance
-#                       to the left(-90 degrees)
+# pfc_move_right     -> Moves the turtle a certain distance to the right(90 degrees) #
+# pfc_move_left      -> Moves the turtle a certain distance to the left(-90 degrees)
 # pfc_turn_right     -> Turns the turtle certain degrees to the right
 # pfc_turn_left      -> Turns the turtle certain degrees to the left
 # pfc_draw_square    -> Draws a square
 # pfc_draw_triangle  -> Draws an equilateral triangle
 # pfc_draw_circle    -> Draws a circle of a certain radius length
-# pfc_draw_rectangle -> Draws a rectangle with a certain upper and bottom
-# side length and a certain left and right side length
+# pfc_draw_rectangle -> Draws a rectangle with a certain upper and bottom side length and a certain left and right side length
 # pfc_set_position   -> Set the turtle in the position received
 
 import sys

@@ -1,7 +1,0 @@
-program vector_nesting;
-
-var i, j : int;
-
-main {
-	var i : bool;
-}
