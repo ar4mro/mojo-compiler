@@ -79,7 +79,7 @@ class VirtualMachine():
         # Executes for each quadruple
         while self.number_of_current_instruction < self.number_of_instructions:
             current_instruction = self.instructions[self.number_of_current_instruction]
-            print(current_instruction)
+            #print(current_instruction)
 
             # Obtains the type of action, the addresses of the operands
             # and where the result will be stored

@@ -1141,8 +1141,8 @@ def make_parser():
     parser = yacc.yacc()
 
     #print("Name of the file to be parsed")
-    #file_name = input()
-    file_name = 'hilbert_curve.txt'
+    file_name = input('Please enter the name of the program: \n')
+    file_name = file_name + '.txt'
 
     with open(file_name) as file_object:
         code = file_object.read()
@@ -1151,7 +1151,7 @@ def make_parser():
     #my_program.function_directory.print_directory()
     #print(str(my_program.temporal_parameters_types))
     #my_program.print_stacks()
-    my_program.print_quadruples()
+    #my_program.print_quadruples()
     #my_program.memory.print_memory('global', 'int')
 
     virtual_machine = VirtualMachine(my_program.memory, my_program.function_directory,

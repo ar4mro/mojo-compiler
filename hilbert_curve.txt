@@ -37,7 +37,7 @@ main {
 
   step = input("Enter the lenght of the hilbert curve lines");
   rule = input("Enter A or B for different curve patterns");
-  angle = input("Enter angle of hilbert curve pattern");
+  angle = input("Enter 90 or 120 angle for hilbert curve pattern");
   depth = input("Enter the depth of the hilbert curve");
   pen = input("Enter the pen color");
 
@@ -47,7 +47,6 @@ main {
   pen_up();
   set_position(0, 0);
   pen_down();
-  draw_circle(20);
   hilbert(step, rule, angle, depth);
   finish_drawing();
 }
